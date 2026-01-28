@@ -69,7 +69,7 @@ class NBAGamesRepo:
         return list(result.scalars())
 
     async def get_past_teams_matchups_series(
-        self, session: AsyncSession, guest_team: NBATeam, host_team: NBATeam, market_type: MarketType
+        self, session: AsyncSession, guest_team: NBATeam, host_team: NBATeam, market_type: MarketType, limit: int | None
     ) -> list[Any]:
 
         stmt = (
@@ -95,6 +95,9 @@ class NBAGamesRepo:
                 )
             )
         )
+
+        if limit is not None:
+            stmt = stmt.limit(limit)
 
         result = await session.execute(stmt)
         return list(result.all())
