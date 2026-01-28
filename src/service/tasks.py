@@ -3,6 +3,7 @@ from decimal import Decimal
 from src.database.connection import async_session_maker
 from src.service.domain import MarketType, NBATeam
 from src.service.repos import NBAGamesRepo
+from src.service.schemas import GameMatchup, MatchupPriceEntry
 
 
 async def get_team_games(team: NBATeam) -> list[int]:
@@ -19,21 +20,39 @@ async def get_teams_matchups(guest_team: NBATeam, host_team: NBATeam) -> list[in
 
 async def get_teams_matchups_data(
     guest_team: NBATeam, host_team: NBATeam, market_type: MarketType = MarketType.moneyline
-) -> dict[str, dict[str, dict[int, dict[str, Decimal]]]]:
+) -> dict[int, GameMatchup]:
     async with async_session_maker() as session:
-        raw_prices = await NBAGamesRepo().get_past_teams_matchups_price_series(
+        raw_games_data = await NBAGamesRepo().get_past_teams_matchups_series(
             session, guest_team, host_team, market_type
         )
 
-    game_data: dict[str, dict[str, dict[int, dict[str, Decimal]]]] = {}
-    for game_id, game_date, ts, g_buy, g_sell, h_buy, h_sell in raw_prices:
-        if game_id not in game_data:
-            game_data[game_id] = {"date": game_date.isoformat(), "prices": {}}
+    games_data_dict: dict[int, GameMatchup] = {}
+    for game_id, game_date, guest_score, host_score, ts, g_buy, g_sell, h_buy, h_sell in raw_games_data:
+        if game_id not in games_data_dict:
+            games_data_dict[game_id] = GameMatchup(
+                game_id=game_id,
+                game_date=game_date,
+                market_type=market_type,
+                guest_team=guest_team.name,
+                host_team=host_team.name,
+                guest_score=guest_score,
+                host_score=host_score,
+                prices=[],
+            )
 
-        game_data[game_id]["prices"][ts] = {
-            "guest_buy": g_buy,
-            "guest_sell": g_sell,
-            "host_buy": h_buy,
-            "host_sell": h_sell,
-        }
-    return game_data
+        def normalize(buy: Decimal | None, sell: Decimal | None) -> Decimal | None:
+            if buy is not None and sell is not None:
+                return (buy + sell) / 2
+            return buy or sell
+
+        games_data_dict[game_id].prices.append(
+            MatchupPriceEntry(
+                timestamp=ts,
+                guest_buy=normalize(g_buy, g_sell),
+                guest_sell=None,
+                host_buy=normalize(h_buy, h_sell),
+                host_sell=None,
+            )
+        )
+
+    return games_data_dict
