@@ -32,7 +32,7 @@ class NBAGamesRepo:
         result = await session.execute(stmt)
         return list(result.scalars())
 
-    async def get_past_teams_matchups_price_series(
+    async def get_past_teams_matchups_series(
         self, session: AsyncSession, guest_team: NBATeam, host_team: NBATeam, market_type: MarketType
     ) -> list[Any]:
 
@@ -40,6 +40,8 @@ class NBAGamesRepo:
             select(
                 NBAGamesModel.id,
                 NBAGamesModel.game_date,
+                NBAGamesModel.guest_score,
+                NBAGamesModel.host_score,
                 NBAPricesModel.timestamp,
                 NBAPricesModel.price_guest_buy,
                 NBAPricesModel.price_guest_sell,
