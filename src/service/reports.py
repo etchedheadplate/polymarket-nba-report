@@ -5,11 +5,13 @@ from src.core.reports import Report
 from src.database.connection import async_session_maker
 from src.service.repos import NBAGamesRepo
 from src.service.schemas import GamesSeriesPriceResponse, GamesSeriesQuery, GamesSeriesResponse
+from src.service.summary import GamesSummary
 from src.service.visuals import GamesPlot
 
 
 class GamesReport(Report):
     _visuals_cls = GamesPlot
+    _summary_cls = GamesSummary
 
     def __init__(self, query: GamesSeriesQuery) -> None:
         super().__init__(query)
@@ -18,7 +20,7 @@ class GamesReport(Report):
         async with async_session_maker() as session:
             return await NBAGamesRepo().get_games_series(session, self.query)
 
-    def _process_data(self, raw_data: list[Any]) -> dict[int, GamesSeriesResponse]:
+    def _process_data(self, query_rows: list[Any]) -> dict[int, GamesSeriesResponse]:
         games_data_dict: dict[int, GamesSeriesResponse] = {}
 
         def normalize_prices(buy: Decimal | None, sell: Decimal | None) -> Decimal | None:
@@ -39,7 +41,7 @@ class GamesReport(Report):
             g_sell,
             h_buy,
             h_sell,
-        ) in raw_data:
+        ) in query_rows:
             game_entry = games_data_dict.setdefault(
                 game_id,
                 GamesSeriesResponse(
