@@ -51,36 +51,36 @@ class Color(StrEnum):
 
 @dataclass
 class NBAColor:
-    PHI = {"guest": Color.LIGHT_RED, "host": Color.DARK_BLUE}
-    MIL = {"guest": Color.LIGHT_GOLD, "host": Color.DARK_GREEN}
-    CHI = {"guest": Color.LIGHT_RED, "host": Color.DARK_GREY}
-    CLE = {"guest": Color.LIGHT_RED, "host": Color.DARK_RED}
-    BOS = {"guest": Color.LIGHT_GOLD, "host": Color.DARK_GREEN}
-    LAC = {"guest": Color.LIGHT_RED, "host": Color.DARK_BLUE}
-    MEM = {"guest": Color.LIGHT_BLUE, "host": Color.DARK_BLUE}
-    ATL = {"guest": Color.LIGHT_RED, "host": Color.DARK_GREY}
-    MIA = {"guest": Color.LIGHT_ORANGE, "host": Color.DARK_RED}
-    CHA = {"guest": Color.LIGHT_BLUE, "host": Color.DARK_BLUE}
-    UTA = {"guest": Color.LIGHT_BLUE, "host": Color.DARK_PURPLE}
-    SAC = {"guest": Color.LIGHT_GREY, "host": Color.DARK_PURPLE}
-    NYK = {"guest": Color.LIGHT_ORANGE, "host": Color.DARK_BLUE}
-    LAL = {"guest": Color.LIGHT_YELLOW, "host": Color.DARK_PURPLE}
-    ORL = {"guest": Color.LIGHT_BLUE, "host": Color.DARK_BLUE}
-    DAL = {"guest": Color.LIGHT_BLUE, "host": Color.DARK_BLUE}
-    BKN = {"guest": Color.LIGHT_GREY, "host": Color.DARK_GREY}
-    DEN = {"guest": Color.LIGHT_YELLOW, "host": Color.DARK_BLUE}
-    IND = {"guest": Color.LIGHT_YELLOW, "host": Color.DARK_BLUE}
-    NOP = {"guest": Color.LIGHT_RED, "host": Color.DARK_BLUE}
-    DET = {"guest": Color.LIGHT_RED, "host": Color.DARK_BLUE}
-    TOR = {"guest": Color.LIGHT_RED, "host": Color.DARK_GREY}
-    HOU = {"guest": Color.LIGHT_RED, "host": Color.DARK_GREY}
-    SAS = {"guest": Color.LIGHT_GREY, "host": Color.DARK_GREY}
-    PHX = {"guest": Color.LIGHT_ORANGE, "host": Color.DARK_PURPLE}
-    OKC = {"guest": Color.LIGHT_RED, "host": Color.DARK_BLUE}
-    MIN = {"guest": Color.LIGHT_GREY, "host": Color.DARK_BLUE}
-    POR = {"guest": Color.LIGHT_RED, "host": Color.DARK_GREY}
-    GSW = {"guest": Color.LIGHT_YELLOW, "host": Color.DARK_BLUE}
-    WAS = {"guest": Color.LIGHT_RED, "host": Color.DARK_BLUE}
+    PHI = {"guest": Color.DARK_BLUE, "host": Color.LIGHT_RED}
+    MIL = {"guest": Color.DARK_GREEN, "host": Color.LIGHT_GOLD}
+    CHI = {"guest": Color.DARK_GREY, "host": Color.LIGHT_RED}
+    CLE = {"guest": Color.DARK_RED, "host": Color.LIGHT_RED}
+    BOS = {"guest": Color.DARK_GREEN, "host": Color.LIGHT_GOLD}
+    LAC = {"guest": Color.DARK_BLUE, "host": Color.LIGHT_RED}
+    MEM = {"guest": Color.DARK_BLUE, "host": Color.LIGHT_BLUE}
+    ATL = {"guest": Color.DARK_GREY, "host": Color.LIGHT_RED}
+    MIA = {"guest": Color.DARK_RED, "host": Color.LIGHT_ORANGE}
+    CHA = {"guest": Color.DARK_BLUE, "host": Color.LIGHT_BLUE}
+    UTA = {"guest": Color.DARK_PURPLE, "host": Color.LIGHT_BLUE}
+    SAC = {"guest": Color.DARK_PURPLE, "host": Color.LIGHT_GREY}
+    NYK = {"guest": Color.DARK_BLUE, "host": Color.LIGHT_ORANGE}
+    LAL = {"guest": Color.DARK_PURPLE, "host": Color.LIGHT_YELLOW}
+    ORL = {"guest": Color.DARK_BLUE, "host": Color.LIGHT_BLUE}
+    DAL = {"guest": Color.DARK_BLUE, "host": Color.LIGHT_BLUE}
+    BKN = {"guest": Color.DARK_GREY, "host": Color.LIGHT_GREY}
+    DEN = {"guest": Color.DARK_BLUE, "host": Color.LIGHT_YELLOW}
+    IND = {"guest": Color.DARK_BLUE, "host": Color.LIGHT_YELLOW}
+    NOP = {"guest": Color.DARK_BLUE, "host": Color.LIGHT_RED}
+    DET = {"guest": Color.DARK_BLUE, "host": Color.LIGHT_RED}
+    TOR = {"guest": Color.DARK_GREY, "host": Color.LIGHT_RED}
+    HOU = {"guest": Color.DARK_GREY, "host": Color.LIGHT_RED}
+    SAS = {"guest": Color.DARK_GREY, "host": Color.LIGHT_GREY}
+    PHX = {"guest": Color.DARK_PURPLE, "host": Color.LIGHT_ORANGE}
+    OKC = {"guest": Color.DARK_BLUE, "host": Color.LIGHT_RED}
+    MIN = {"guest": Color.DARK_BLUE, "host": Color.LIGHT_GREY}
+    POR = {"guest": Color.DARK_GREY, "host": Color.LIGHT_RED}
+    GSW = {"guest": Color.DARK_BLUE, "host": Color.LIGHT_YELLOW}
+    WAS = {"guest": Color.DARK_BLUE, "host": Color.LIGHT_RED}
 
 
 class MarketType(StrEnum):  # adjusted for needed types
