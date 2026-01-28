@@ -1,18 +1,25 @@
 import asyncio
 
 from src.service.domain import NBATeam
-from src.service.tasks import get_team_games, get_teams_matchups, get_teams_matchups_data
+from src.service.reports import GamesReport
+from src.service.schemas import GamesSeriesQuery
+
+
+async def generate_all_combinations():
+    for guest in NBATeam:
+        query = GamesSeriesQuery(team=guest)
+
+        for host in NBATeam:
+            query.team_vs = host
+
+            report = GamesReport(query)
+            await report.make_report()
 
 
 async def main():
-    guest_team = NBATeam.BOS
-    host_team = NBATeam.NYK
-
-    games = await get_team_games(guest_team)
-    matchups = await get_teams_matchups(guest_team, host_team)
-    prices = await get_teams_matchups_data(guest_team, host_team)
-
-    print(len(games), len(matchups) == len(prices))
+    query = GamesSeriesQuery(team=NBATeam.LAL, team_vs=NBATeam.BOS)
+    report = GamesReport(query)
+    await report.make_report()
 
 
 if __name__ == "__main__":
