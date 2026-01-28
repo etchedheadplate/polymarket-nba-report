@@ -114,6 +114,7 @@ venv.bak/
 secrets.json
 .secrets.baseline
 
+media/
 .local/
 logs/
 tmp/
