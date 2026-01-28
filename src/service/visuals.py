@@ -4,6 +4,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 
 from src.core.visuals import Plot
+from src.logger import logger
 from src.service.domain import NBATeamColor
 from src.service.schemas import GamesSeriesResponse
 
@@ -12,7 +13,7 @@ class GamesPlot(Plot):
     def __init__(self, games_data: dict[int, GamesSeriesResponse]) -> None:
         super().__init__(games_data)
 
-    def _make_transparent_image(self) -> list[tuple[Path, Path]]:
+    def _make_transparent_data_image(self) -> list[tuple[Path, Path]]:
         visuals_paths: list[tuple[Path, Path]] = []
 
         for game_id, game_data in self._input_data.items():
@@ -37,9 +38,11 @@ class GamesPlot(Plot):
             path_with_bg = self._plot_dir / f"{game_date}_{guest_team}_{host_team}_{game_id}_{market_type}.png"
 
             if path_with_bg.exists():
+                logger.debug("File exists: %s", path_with_bg)
                 continue
 
             if not guest_series and not host_series:
+                logger.debug("Guest or host series data is absent")
                 continue
 
             with plt.rc_context(rc=self._plot_style):  # type: ignore[reportUnknownMemberType]
