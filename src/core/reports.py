@@ -4,6 +4,7 @@ from typing import Any
 
 from src.core.summary import Summary
 from src.core.visuals import Visuals
+from src.logger import logger
 
 
 class Report(ABC):
@@ -19,18 +20,19 @@ class Report(ABC):
     async def _query_database(self) -> list[Any]: ...
 
     @abstractmethod
-    def _process_data(self, raw_data: list[Any]) -> Any: ...
+    def _process_data(self, query_rows: list[Any]) -> Any: ...
 
-    def _create_visuals(self, procseesed_data: Any) -> None:
-        visuals_processor = self._visuals_cls(procseesed_data)
+    def _create_visuals(self, procesesed_items: Any) -> None:
+        visuals_processor = self._visuals_cls(procesesed_items)
         self.visuals = visuals_processor.create_visuals()
 
-    def _create_summary(self, procseesed_data: Any) -> None:
-        summary_processor = self._summary_cls(procseesed_data)
+    def _create_summary(self, procesesed_items: Any) -> None:
+        summary_processor = self._summary_cls(procesesed_items)
         self.summary = summary_processor.create_summary()
 
     async def make_report(self) -> Any:
-        raw_data = await self._query_database()
-        procseesed_data = self._process_data(raw_data)
-        self._create_visuals(procseesed_data)
-        self._create_summary(procseesed_data)
+        query_rows = await self._query_database()
+        procesesed_items = self._process_data(query_rows)
+        logger.debug("Processed %s items from %s rows", len(procesesed_items), len(query_rows))
+        self._create_visuals(procesesed_items)
+        self._create_summary(procesesed_items)
