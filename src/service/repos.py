@@ -4,30 +4,22 @@ from sqlalchemy import and_, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database.models import NBAGamesModel, NBAMarketsModel, NBAPricesModel
-from src.service.domain import GameStatus, MarketType, NBATeam
+from src.service.domain import NBATeamSide
+from src.service.schemas import GamesSeriesQuery
 
 
 class NBAGamesRepo:
-    async def get_past_team_games_ids(self, session: AsyncSession, team: NBATeam) -> list[int]:
-        stmt = select(NBAGamesModel.id).where(
-            and_(
-                NBAGamesModel.game_status == GameStatus.FINISHED,
-                or_(NBAGamesModel.guest_team == team.name, NBAGamesModel.host_team == team.name),
-            )
-        )
-        result = await session.execute(stmt)
-        return list(result.scalars().all())
-
-    async def get_past_team_games_series(
-        self, session: AsyncSession, team: NBATeam, market_type: MarketType, limit: int | None
-    ) -> list[Any]:
+    async def get_games_series(self, session: AsyncSession, query: GamesSeriesQuery) -> list[Any]:
 
         stmt = (
             select(
                 NBAGamesModel.id,
                 NBAGamesModel.game_date,
+                NBAGamesModel.guest_team,
+                NBAGamesModel.host_team,
                 NBAGamesModel.guest_score,
                 NBAGamesModel.host_score,
+                NBAMarketsModel.market_type,
                 NBAPricesModel.timestamp,
                 NBAPricesModel.price_guest_buy,
                 NBAPricesModel.price_guest_sell,
@@ -36,68 +28,44 @@ class NBAGamesRepo:
             )
             .join(NBAMarketsModel, NBAPricesModel.market_id == NBAMarketsModel.id)
             .join(NBAGamesModel, NBAMarketsModel.event_id == NBAGamesModel.id)
-            .where(
-                and_(
-                    NBAGamesModel.game_status == GameStatus.FINISHED,
-                    NBAMarketsModel.market_type == market_type,
+        )
+
+        conditions = [NBAGamesModel.game_status == query.game_status, NBAMarketsModel.market_type == query.market_type]
+
+        if query.team_side == NBATeamSide.GUEST:
+            conditions.append(NBAGamesModel.guest_team == query.team.name)
+        elif query.team_side == NBATeamSide.HOST:
+            conditions.append(NBAGamesModel.host_team == query.team.name)
+        elif not query.team_side:
+            conditions.append(
+                or_(NBAGamesModel.guest_team == query.team.name, NBAGamesModel.host_team == query.team.name)
+            )
+
+        if query.team_vs:
+            if query.team_side == NBATeamSide.GUEST:
+                conditions.append(
+                    and_(NBAGamesModel.guest_team == query.team.name, NBAGamesModel.host_team == query.team_vs.name)
+                )
+            elif query.team_side == NBATeamSide.HOST:
+                conditions.append(
+                    and_(NBAGamesModel.guest_team == query.team_vs.name, NBAGamesModel.host_team == query.team.name)
+                )
+            else:
+                conditions.append(
                     or_(
-                        NBAGamesModel.guest_team == team.name,
-                        NBAGamesModel.host_team == team.name,
-                    ),
+                        and_(
+                            NBAGamesModel.guest_team == query.team.name, NBAGamesModel.host_team == query.team_vs.name
+                        ),
+                        and_(
+                            NBAGamesModel.guest_team == query.team_vs.name, NBAGamesModel.host_team == query.team.name
+                        ),
+                    )
                 )
-            )
-        )
 
-        if limit is not None:
-            stmt = stmt.limit(limit)
+        stmt = stmt.where(*conditions)
 
-        result = await session.execute(stmt)
-        return list(result.all())
-
-    async def get_past_teams_matchups_ids(
-        self, session: AsyncSession, guest_team: NBATeam, host_team: NBATeam
-    ) -> list[int]:
-        stmt = select(NBAGamesModel.id).where(
-            and_(
-                NBAGamesModel.game_status == GameStatus.FINISHED,
-                NBAGamesModel.guest_team == guest_team.name,
-                NBAGamesModel.host_team == host_team.name,
-            )
-        )
-
-        result = await session.execute(stmt)
-        return list(result.scalars())
-
-    async def get_past_teams_matchups_series(
-        self, session: AsyncSession, guest_team: NBATeam, host_team: NBATeam, market_type: MarketType, limit: int | None
-    ) -> list[Any]:
-
-        stmt = (
-            select(
-                NBAGamesModel.id,
-                NBAGamesModel.game_date,
-                NBAGamesModel.guest_score,
-                NBAGamesModel.host_score,
-                NBAPricesModel.timestamp,
-                NBAPricesModel.price_guest_buy,
-                NBAPricesModel.price_guest_sell,
-                NBAPricesModel.price_host_buy,
-                NBAPricesModel.price_host_sell,
-            )
-            .join(NBAMarketsModel, NBAPricesModel.market_id == NBAMarketsModel.id)
-            .join(NBAGamesModel, NBAMarketsModel.event_id == NBAGamesModel.id)
-            .where(
-                and_(
-                    NBAGamesModel.game_status == GameStatus.FINISHED,
-                    NBAGamesModel.guest_team == guest_team.name,
-                    NBAGamesModel.host_team == host_team.name,
-                    NBAMarketsModel.market_type == market_type,
-                )
-            )
-        )
-
-        if limit is not None:
-            stmt = stmt.limit(limit)
+        if query.limit is not None:
+            stmt = stmt.limit(query.limit)
 
         result = await session.execute(stmt)
         return list(result.all())
