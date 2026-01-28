@@ -35,6 +35,11 @@ class NBATeam(StrEnum):
     WAS = "Wizards"
 
 
+class NBATeamSide(StrEnum):
+    GUEST = "guest"
+    HOST = "host"
+
+
 class Color(StrEnum):
     LIGHT_RED = "#ff595e"
     LIGHT_BLUE = "#00cecb"
@@ -50,7 +55,7 @@ class Color(StrEnum):
 
 
 @dataclass
-class NBAColor:
+class NBATeamColor:
     PHI = {"guest": Color.DARK_BLUE, "host": Color.LIGHT_RED}
     MIL = {"guest": Color.DARK_GREEN, "host": Color.LIGHT_GOLD}
     CHI = {"guest": Color.DARK_GREY, "host": Color.LIGHT_RED}
