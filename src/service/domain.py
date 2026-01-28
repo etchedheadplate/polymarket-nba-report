@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from enum import StrEnum
 
 
@@ -32,6 +33,54 @@ class NBATeam(StrEnum):
     POR = "Blazers"
     GSW = "Warriors"
     WAS = "Wizards"
+
+
+class Colors(StrEnum):
+    LIGHT_RED = "#ff595e"
+    LIGHT_BLUE = "#00cecb"
+    LIGHT_GREY = "#ced4da"
+    LIGHT_GOLD = "#ffef9f"
+    LIGHT_ORANGE = "#f35b04"
+    LIGHT_YELLOW = "#f7b801"
+    DARK_RED = "#9a031e"
+    DARK_BLUE = "#4361ee"
+    DARK_GREY = "#6c757d"
+    DARK_GREEN = "#0ead69"
+    DARK_PURPLE = "#7209b7"
+
+
+@dataclass
+class NBAColor:
+    PHI = {"guest": Colors.LIGHT_RED, "host": Colors.DARK_BLUE}
+    MIL = {"guest": Colors.LIGHT_GOLD, "host": Colors.DARK_GREEN}
+    CHI = {"guest": Colors.LIGHT_RED, "host": Colors.DARK_GREY}
+    CLE = {"guest": Colors.LIGHT_RED, "host": Colors.DARK_RED}
+    BOS = {"guest": Colors.LIGHT_GOLD, "host": Colors.DARK_GREEN}
+    LAC = {"guest": Colors.LIGHT_RED, "host": Colors.DARK_BLUE}
+    MEM = {"guest": Colors.LIGHT_BLUE, "host": Colors.DARK_BLUE}
+    ATL = {"guest": Colors.LIGHT_RED, "host": Colors.DARK_GREY}
+    MIA = {"guest": Colors.LIGHT_ORANGE, "host": Colors.DARK_RED}
+    CHA = {"guest": Colors.LIGHT_BLUE, "host": Colors.DARK_BLUE}
+    UTA = {"guest": Colors.LIGHT_BLUE, "host": Colors.DARK_PURPLE}
+    SAC = {"guest": Colors.LIGHT_GREY, "host": Colors.DARK_PURPLE}
+    NYK = {"guest": Colors.LIGHT_ORANGE, "host": Colors.DARK_BLUE}
+    LAL = {"guest": Colors.LIGHT_YELLOW, "host": Colors.DARK_PURPLE}
+    ORL = {"guest": Colors.LIGHT_BLUE, "host": Colors.DARK_BLUE}
+    DAL = {"guest": Colors.LIGHT_BLUE, "host": Colors.DARK_BLUE}
+    BKN = {"guest": Colors.LIGHT_GREY, "host": Colors.DARK_GREY}
+    DEN = {"guest": Colors.LIGHT_YELLOW, "host": Colors.DARK_BLUE}
+    IND = {"guest": Colors.LIGHT_YELLOW, "host": Colors.DARK_BLUE}
+    NOP = {"guest": Colors.LIGHT_RED, "host": Colors.DARK_BLUE}
+    DET = {"guest": Colors.LIGHT_RED, "host": Colors.DARK_BLUE}
+    TOR = {"guest": Colors.LIGHT_RED, "host": Colors.DARK_GREY}
+    HOU = {"guest": Colors.LIGHT_RED, "host": Colors.DARK_GREY}
+    SAS = {"guest": Colors.LIGHT_GREY, "host": Colors.DARK_GREY}
+    PHX = {"guest": Colors.LIGHT_ORANGE, "host": Colors.DARK_PURPLE}
+    OKC = {"guest": Colors.LIGHT_RED, "host": Colors.DARK_BLUE}
+    MIN = {"guest": Colors.LIGHT_GREY, "host": Colors.DARK_BLUE}
+    POR = {"guest": Colors.LIGHT_RED, "host": Colors.DARK_GREY}
+    GSW = {"guest": Colors.LIGHT_YELLOW, "host": Colors.DARK_BLUE}
+    WAS = {"guest": Colors.LIGHT_RED, "host": Colors.DARK_BLUE}
 
 
 class MarketType(StrEnum):  # adjusted for needed types
