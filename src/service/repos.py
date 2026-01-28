@@ -18,6 +18,42 @@ class NBAGamesRepo:
         result = await session.execute(stmt)
         return list(result.scalars().all())
 
+    async def get_past_team_games_series(
+        self, session: AsyncSession, team: NBATeam, market_type: MarketType, limit: int | None
+    ) -> list[Any]:
+
+        stmt = (
+            select(
+                NBAGamesModel.id,
+                NBAGamesModel.game_date,
+                NBAGamesModel.guest_score,
+                NBAGamesModel.host_score,
+                NBAPricesModel.timestamp,
+                NBAPricesModel.price_guest_buy,
+                NBAPricesModel.price_guest_sell,
+                NBAPricesModel.price_host_buy,
+                NBAPricesModel.price_host_sell,
+            )
+            .join(NBAMarketsModel, NBAPricesModel.market_id == NBAMarketsModel.id)
+            .join(NBAGamesModel, NBAMarketsModel.event_id == NBAGamesModel.id)
+            .where(
+                and_(
+                    NBAGamesModel.game_status == GameStatus.FINISHED,
+                    NBAMarketsModel.market_type == market_type,
+                    or_(
+                        NBAGamesModel.guest_team == team.name,
+                        NBAGamesModel.host_team == team.name,
+                    ),
+                )
+            )
+        )
+
+        if limit is not None:
+            stmt = stmt.limit(limit)
+
+        result = await session.execute(stmt)
+        return list(result.all())
+
     async def get_past_teams_matchups_ids(
         self, session: AsyncSession, guest_team: NBATeam, host_team: NBATeam
     ) -> list[int]:
