@@ -37,6 +37,7 @@ class Visuals(ABC):
 
             image_with_bg = Image.alpha_composite(background, image_without_bg)
             image_with_bg.save(path_with_bg)
+            logger.debug("Created: %s", path_with_bg)
 
             image_paths.append(path_with_bg)
             path_without_bg.unlink(missing_ok=True)
