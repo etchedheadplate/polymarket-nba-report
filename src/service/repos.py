@@ -11,40 +11,35 @@ from src.service.schemas import GamesSeriesQuery
 class NBAGamesRepo:
     async def get_games_series(self, session: AsyncSession, query: GamesSeriesQuery) -> list[Any]:
 
+        def build_team_conditions(query: GamesSeriesQuery):
+            team = query.team.name
+
+            if not query.team_vs:
+                if query.team_side == NBATeamSide.GUEST:
+                    return NBAGamesModel.guest_team == team
+                elif query.team_side == NBATeamSide.HOST:
+                    return NBAGamesModel.host_team == team
+                else:
+                    return or_(NBAGamesModel.guest_team == team, NBAGamesModel.host_team == team)
+
+            else:
+                vs = query.team_vs.name
+
+                if query.team_side == NBATeamSide.GUEST:
+                    return and_(NBAGamesModel.guest_team == team, NBAGamesModel.host_team == vs)
+                elif query.team_side == NBATeamSide.HOST:
+                    return and_(NBAGamesModel.guest_team == vs, NBAGamesModel.host_team == team)
+                else:
+                    return or_(
+                        and_(NBAGamesModel.guest_team == team, NBAGamesModel.host_team == vs),
+                        and_(NBAGamesModel.guest_team == vs, NBAGamesModel.host_team == team),
+                    )
+
         base_conditions = [
             NBAGamesModel.game_status == query.game_status,
             NBAMarketsModel.market_type == query.market_type,
+            *build_team_conditions(query),
         ]
-
-        if query.team_side == NBATeamSide.GUEST:
-            base_conditions.append(NBAGamesModel.guest_team == query.team.name)
-        elif query.team_side == NBATeamSide.HOST:
-            base_conditions.append(NBAGamesModel.host_team == query.team.name)
-        else:
-            base_conditions.append(
-                or_(NBAGamesModel.guest_team == query.team.name, NBAGamesModel.host_team == query.team.name)
-            )
-
-        if query.team_vs:
-            if query.team_side == NBATeamSide.GUEST:
-                base_conditions.append(
-                    and_(NBAGamesModel.guest_team == query.team.name, NBAGamesModel.host_team == query.team_vs.name)
-                )
-            elif query.team_side == NBATeamSide.HOST:
-                base_conditions.append(
-                    and_(NBAGamesModel.guest_team == query.team_vs.name, NBAGamesModel.host_team == query.team.name)
-                )
-            else:
-                base_conditions.append(
-                    or_(
-                        and_(
-                            NBAGamesModel.guest_team == query.team.name, NBAGamesModel.host_team == query.team_vs.name
-                        ),
-                        and_(
-                            NBAGamesModel.guest_team == query.team_vs.name, NBAGamesModel.host_team == query.team.name
-                        ),
-                    )
-                )
 
         games_ids_stmt = (
             select(NBAGamesModel.id)
