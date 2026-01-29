@@ -4,24 +4,24 @@ from typing import Any
 from src.core.reports import Report
 from src.database.connection import async_session_maker
 from src.service.repos import NBAGamesRepo
-from src.service.schemas import GamesSeriesPriceResponse, GamesSeriesQuery, GamesSeriesResponse
-from src.service.summary import GamesSummary
-from src.service.visuals import GamesPlot
+from src.service.schemas import GameSeriesQuery, QuoteSeriesPriceResponse, QuoteSeriesResponse
+from src.service.summary import QuoteSeriesSummary
+from src.service.visuals import QuoteSeriesPlot
 
 
-class GamesReport(Report):
-    _visuals_cls = GamesPlot
-    _summary_cls = GamesSummary
+class QuoteSeriesReport(Report):
+    _visuals_cls = QuoteSeriesPlot
+    _summary_cls = QuoteSeriesSummary
 
-    def __init__(self, query: GamesSeriesQuery) -> None:
+    def __init__(self, query: GameSeriesQuery) -> None:
         super().__init__(query)
 
     async def _query_database(self) -> list[Any]:
         async with async_session_maker() as session:
             return await NBAGamesRepo().get_games_series(session, self.query)
 
-    def _process_data(self, query_rows: list[Any]) -> dict[int, GamesSeriesResponse]:
-        games_data_dict: dict[int, GamesSeriesResponse] = {}
+    def _process_data(self, query_rows: list[Any]) -> dict[int, QuoteSeriesResponse]:
+        games_data_dict: dict[int, QuoteSeriesResponse] = {}
 
         def normalize_prices(buy: Decimal | None, sell: Decimal | None) -> Decimal | None:
             if buy is not None and sell is not None:
@@ -44,7 +44,7 @@ class GamesReport(Report):
         ) in query_rows:
             game_entry = games_data_dict.setdefault(
                 game_id,
-                GamesSeriesResponse(
+                QuoteSeriesResponse(
                     game_id=game_id,
                     game_date=game_date,
                     market_type=market_type,
@@ -57,7 +57,7 @@ class GamesReport(Report):
             )
 
             game_entry.prices.append(
-                GamesSeriesPriceResponse(
+                QuoteSeriesPriceResponse(
                     timestamp=ts,
                     guest_price=normalize_prices(g_buy, g_sell),
                     host_price=normalize_prices(h_buy, h_sell),

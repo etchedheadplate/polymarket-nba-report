@@ -1,24 +1,24 @@
 import asyncio
 
-from src.service.domain import NBATeam
-from src.service.reports import GamesReport
-from src.service.schemas import GamesSeriesQuery
+from src.service.domain import NBATeam, NBATeamSide
+from src.service.reports import QuoteSeriesReport
+from src.service.schemas import GameSeriesQuery
 
 
 async def generate_all_combinations():
     for guest in NBATeam:
-        query = GamesSeriesQuery(team=guest)
+        query = GameSeriesQuery(team=guest)
 
         for host in NBATeam:
             query.team_vs = host
 
-            report = GamesReport(query)
+            report = QuoteSeriesReport(query)
             await report.make_report()
 
 
 async def main():
-    query = GamesSeriesQuery(team=NBATeam.LAL, team_vs=NBATeam.BOS)
-    report = GamesReport(query)
+    query = GameSeriesQuery(team=NBATeam.NYK, team_vs=NBATeam.TOR, limit=4, team_side=NBATeamSide.GUEST)
+    report = QuoteSeriesReport(query)
     await report.make_report()
 
 

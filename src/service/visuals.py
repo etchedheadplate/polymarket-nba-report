@@ -6,11 +6,11 @@ import matplotlib.pyplot as plt
 from src.core.visuals import Plot
 from src.logger import logger
 from src.service.domain import NBATeamColor
-from src.service.schemas import GamesSeriesResponse
+from src.service.schemas import QuoteSeriesResponse
 
 
-class GamesPlot(Plot):
-    def __init__(self, games_data: dict[int, GamesSeriesResponse]) -> None:
+class QuoteSeriesPlot(Plot):
+    def __init__(self, games_data: dict[int, QuoteSeriesResponse]) -> None:
         super().__init__(games_data)
 
     def _make_transparent_data_image(self) -> list[tuple[Path, Path]]:

@@ -12,19 +12,19 @@ class GameReportQuery(BaseModel):
     limit: PositiveInt | None = None
 
 
-class GamesSeriesQuery(GameReportQuery):
+class GameSeriesQuery(GameReportQuery):
     team: NBATeam
     team_vs: NBATeam | None = None
     team_side: NBATeamSide | None = None
 
 
-class GamesSeriesPriceResponse(BaseModel):
+class QuoteSeriesPriceResponse(BaseModel):
     timestamp: int
     guest_price: Decimal | None
     host_price: Decimal | None
 
 
-class GamesSeriesResponse(BaseModel):
+class QuoteSeriesResponse(BaseModel):
     game_id: PositiveInt
     game_date: date
     market_type: str
@@ -32,4 +32,4 @@ class GamesSeriesResponse(BaseModel):
     host_team: str
     guest_score: PositiveInt | None
     host_score: PositiveInt | None
-    prices: list[GamesSeriesPriceResponse]
+    prices: list[QuoteSeriesPriceResponse]
