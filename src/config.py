@@ -12,8 +12,9 @@ class Settings(BaseSettings):
 
     SHARED_DIR: Path
 
-    PLOT_FONT_PATH: Path
-    PLOT_BACKGROUND_PATH: Path
+    VISUALS_FONT_PATH: Path
+    BACKGROUND_QUOTE_SERIES_PATH: Path
+    BACKGROUND_ODDS_FLIP_PATH: Path
 
     model_config = SettingsConfigDict(env_file=".env")
 
