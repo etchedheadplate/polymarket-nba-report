@@ -4,15 +4,12 @@ from typing import Any
 from src.core.reports import Report
 from src.database.connection import async_session_maker
 from src.service.repos import NBAGamesRepo
-from src.service.schemas import GameSeriesQuery, QuoteSeriesPriceResponse, QuoteSeriesResponse
-from src.service.summary import QuoteSeriesSummary
-from src.service.visuals import QuoteSeriesPlot
+from src.service.schemas import GameSeriesPriceResponse, GameSeriesQuery, GameSeriesResponse
+from src.service.summary import OddsFlipSummary, QuoteSeriesSummary
+from src.service.visuals import OddsFlipChart, QuoteSeriesPlot
 
 
-class QuoteSeriesReport(Report):
-    _visuals_cls = QuoteSeriesPlot
-    _summary_cls = QuoteSeriesSummary
-
+class GameSeriesReport(Report):
     def __init__(self, query: GameSeriesQuery) -> None:
         super().__init__(query)
 
@@ -20,8 +17,8 @@ class QuoteSeriesReport(Report):
         async with async_session_maker() as session:
             return await NBAGamesRepo().get_games_series(session, self.query)
 
-    def _process_data(self, query_rows: list[Any]) -> dict[int, QuoteSeriesResponse]:
-        games_data_dict: dict[int, QuoteSeriesResponse] = {}
+    def _process_data(self, query_rows: list[Any]) -> dict[int, GameSeriesResponse]:
+        games_data_dict: dict[int, GameSeriesResponse] = {}
 
         def normalize_prices(buy: Decimal | None, sell: Decimal | None) -> Decimal | None:
             if buy is not None and sell is not None:
@@ -44,7 +41,7 @@ class QuoteSeriesReport(Report):
         ) in query_rows:
             game_entry = games_data_dict.setdefault(
                 game_id,
-                QuoteSeriesResponse(
+                GameSeriesResponse(
                     game_id=game_id,
                     game_date=game_date,
                     market_type=market_type,
@@ -57,7 +54,7 @@ class QuoteSeriesReport(Report):
             )
 
             game_entry.prices.append(
-                QuoteSeriesPriceResponse(
+                GameSeriesPriceResponse(
                     timestamp=ts,
                     guest_price=normalize_prices(g_buy, g_sell),
                     host_price=normalize_prices(h_buy, h_sell),
@@ -65,3 +62,19 @@ class QuoteSeriesReport(Report):
             )
 
         return games_data_dict
+
+
+class QuoteSeriesReport(GameSeriesReport):
+    _visuals_cls = QuoteSeriesPlot
+    _summary_cls = QuoteSeriesSummary
+
+    def __init__(self, query: GameSeriesQuery) -> None:
+        super().__init__(query)
+
+
+class OddsFlipReport(GameSeriesReport):
+    _visuals_cls = OddsFlipChart
+    _summary_cls = OddsFlipSummary
+
+    def __init__(self, query: GameSeriesQuery) -> None:
+        super().__init__(query)
