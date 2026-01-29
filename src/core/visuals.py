@@ -12,6 +12,7 @@ from src.logger import logger
 
 class Visuals(ABC):
     _shared_dir = settings.SHARED_DIR
+    _data_font_path = settings.VISUALS_FONT_PATH
     _output_dir: str
     _data_font_path: Path
     _image_bg_bath: Path
@@ -19,6 +20,11 @@ class Visuals(ABC):
     def __init__(self, input_data: Any) -> None:
         self._input_data = input_data
         os.makedirs(self._shared_dir, exist_ok=True)
+
+        try:
+            fm.fontManager.addfont(self._data_font_path)  # type: ignore[attr-defined]
+        except Exception:
+            logger.error("Failed to set custom font")
 
     @abstractmethod
     def _make_transparent_data_image(self) -> list[tuple[Path, Path]]: ...
@@ -52,8 +58,6 @@ class Visuals(ABC):
 
 class Plot(Visuals):
     _output_dir = "plots"
-    _data_font_path = settings.PLOT_FONT_PATH
-    _image_bg_bath = settings.PLOT_BACKGROUND_PATH
     _plot_style = {
         "font.family": "Montserrat",
         "text.color": "#e9ecef",
@@ -80,7 +84,31 @@ class Plot(Visuals):
         self._plot_dir = self._shared_dir / self._output_dir
         os.makedirs(self._plot_dir, exist_ok=True)
 
-        try:
-            fm.fontManager.addfont(self._data_font_path)  # type: ignore[attr-defined]
-        except Exception:
-            logger.error("Failed to set custom font")
+
+class Chart(Visuals):
+    _output_dir = "charts"
+    _plot_style = {
+        "font.family": "Montserrat",
+        "text.color": "#e9ecef",
+        "figure.facecolor": "#e9ecef",
+        "axes.facecolor": "#e9ecef",
+        "axes.labelcolor": "#e9ecef",
+        "axes.titlecolor": "#e9ecef",
+        "axes.edgecolor": "#bbbbbb",
+        "axes.labelsize": 10,
+        "axes.titlesize": 20,
+        "xtick.labelsize": 12,
+        "ytick.labelsize": 12,
+        "xtick.color": "#e9ecef",
+        "ytick.color": "#e9ecef",
+        "axes.grid": True,
+        "grid.color": "#f8f9fa",
+        "grid.linestyle": "-",
+        "grid.linewidth": 1,
+        "grid.alpha": 0.6,
+    }
+
+    def __init__(self, input_data: Any) -> None:
+        super().__init__(input_data)
+        self._chart_dir = self._shared_dir / self._output_dir
+        os.makedirs(self._chart_dir, exist_ok=True)
