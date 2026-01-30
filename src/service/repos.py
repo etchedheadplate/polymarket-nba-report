@@ -38,7 +38,7 @@ class NBAGamesRepo:
         base_conditions = [
             NBAGamesModel.game_status == query.game_status,
             NBAMarketsModel.market_type == query.market_type,
-            *build_team_conditions(query),
+            build_team_conditions(query),
         ]
 
         games_ids_stmt = (
