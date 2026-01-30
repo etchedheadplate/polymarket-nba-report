@@ -1,7 +1,7 @@
 from datetime import date
 from decimal import Decimal
 
-from pydantic import BaseModel, PositiveInt
+from pydantic import BaseModel, PositiveInt, field_validator
 
 from src.service.domain import GameStatus, MarketType, NBATeam, NBATeamSide
 
@@ -30,3 +30,8 @@ class GameSeriesResponse(BaseModel):
     guest_score: PositiveInt | None
     host_score: PositiveInt | None
     prices: list[GameSeriesPriceResponse]
+
+    @field_validator("market_type", mode="before")
+    @classmethod
+    def normalize_market_type(cls, v: str) -> str:
+        return v.replace("_", " ").title()
