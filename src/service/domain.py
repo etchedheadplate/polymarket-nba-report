@@ -90,7 +90,7 @@ class NBATeamColor:
 
 class MarketType(StrEnum):  # adjusted for needed types
     # assists = "assists"
-    first_half_moneyline = "first_half_moneyline"
+    # first_half_moneyline = "first_half_moneyline"
     # first_half_spreads = "first_half_spreads"
     # first_half_totals = "first_half_totals"
     moneyline = "moneyline"
