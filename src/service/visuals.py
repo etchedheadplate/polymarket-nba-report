@@ -119,8 +119,9 @@ class QuoteSeriesPlot(Plot):
                         label="HT",
                     )
 
-                plt.title(f"{game_date} • {guest_team} {guest_score}:{host_score} {host_team} • {game_id} {market_type}")  # type: ignore[reportUnknownMemberType]
-                plt.xlabel("TIME (UTC)")  # type: ignore[reportUnknownMemberType]
+                plt.ylim(0.0, 1.0)  # type: ignore[reportUnknownMemberType]
+                plt.title(f"{game_date} • {guest_team} {guest_score}:{host_score} {host_team} • {market_type}")  # type: ignore[reportUnknownMemberType]
+                plt.xlabel("DAY, TIME (UTC)")  # type: ignore[reportUnknownMemberType]
                 plt.ylabel("PRICE, USDC")  # type: ignore[reportUnknownMemberType]
                 plt.grid(True)  # type: ignore[reportUnknownMemberType]
                 plt.legend(facecolor="#6c757d", edgecolor="#6c757d", framealpha=0.5, labelcolor="#e9ecef")  # type: ignore[reportUnknownMemberType]
