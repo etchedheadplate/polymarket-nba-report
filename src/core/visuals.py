@@ -15,7 +15,7 @@ class Visuals(ABC):
     _data_font_path = settings.VISUALS_FONT_PATH
     _output_dir: str
     _data_font_path: Path
-    _image_bg_bath: Path
+    _image_bg_path: Path
 
     def __init__(self, input_data: Any) -> None:
         self._input_data = input_data
@@ -35,7 +35,7 @@ class Visuals(ABC):
         for paths in visuals_paths:
             path_without_bg, path_with_bg = paths
 
-            background = Image.open(self._image_bg_bath).convert("RGBA")
+            background = Image.open(self._image_bg_path).convert("RGBA")
             image_without_bg = Image.open(path_without_bg).convert("RGBA")
 
             bg_w, bg_h = background.size
