@@ -11,6 +11,7 @@ from src.logger import logger
 
 
 class Visuals(ABC):
+    _ext = "png"
     _shared_dir = settings.SHARED_DIR
     _data_font_path = settings.VISUALS_FONT_PATH
     _output_dir: str
