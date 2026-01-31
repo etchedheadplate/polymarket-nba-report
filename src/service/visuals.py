@@ -6,18 +6,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from src.config import settings
-from src.core.visuals import Chart, Plot
+from src.core.visuals import Chart, Plot, Visuals
 from src.logger import logger
 from src.service.domain import NBATeamColor
 from src.service.schemas import GameSeriesResponse
 
 
-class QuoteSeriesPlot(Plot):
-    _image_bg_path = settings.BACKGROUND_QUOTE_SERIES_PATH
-
-    def __init__(self, games_data: dict[int, GameSeriesResponse]) -> None:
-        super().__init__(games_data)
-
+class GameSeriesVisuals(Visuals):
     def _detect_halftime(
         self, guest_series: list[tuple[int, Decimal]], host_series: list[tuple[int, Decimal]]
     ) -> tuple[int, int] | None:
@@ -65,6 +60,13 @@ class QuoteSeriesPlot(Plot):
             best_start = center_ts - halftime_duration / 2
 
         return int(best_start), int(best_start + halftime_duration)
+
+
+class QuoteSeriesPlot(Plot, GameSeriesVisuals):
+    _image_bg_path = settings.BACKGROUND_QUOTE_SERIES_PATH
+
+    def __init__(self, games_data: dict[int, GameSeriesResponse]) -> None:
+        super().__init__(games_data)
 
     def _make_transparent_data_image(self) -> list[tuple[Path, Path]]:
         visuals_paths: list[tuple[Path, Path]] = []
@@ -134,7 +136,7 @@ class QuoteSeriesPlot(Plot):
         return visuals_paths
 
 
-class OddsFlipChart(Chart):
+class OddsFlipChart(Chart, GameSeriesVisuals):
     _image_bg_bath = settings.BACKGROUND_ODDS_FLIP_PATH
 
     def __init__(self, games_data: dict[int, GameSeriesResponse]) -> None:
