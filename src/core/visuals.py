@@ -15,7 +15,6 @@ class Visuals(ABC):
     _shared_dir = settings.SHARED_DIR
     _data_font_path = settings.VISUALS_FONT_PATH
     _output_dir: str
-    _data_font_path: Path
     _image_bg_path: Path
 
     def __init__(self, input_data: Any) -> None:
