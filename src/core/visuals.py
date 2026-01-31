@@ -11,18 +11,21 @@ from src.logger import logger
 
 
 class Visuals(ABC):
-    _ext = "png"
-    _shared_dir = settings.SHARED_DIR
-    _data_font_path = settings.VISUALS_FONT_PATH
-    _output_dir: str
-    _image_bg_path: Path
+    _visuals_title: str
+    _img_output_dir: str
+    _img_ext_transp: str = "png"
+    _img_ext_final: str = "png"
+    _path_shared_dir: Path = settings.SHARED_DIR
+    _path_img_font: Path = settings.VISUALS_FONT_PATH
+    _path_img_bg: Path
+    _img_params: dict[str, Any]
 
     def __init__(self, input_data: Any) -> None:
         self._input_data = input_data
-        os.makedirs(self._shared_dir, exist_ok=True)
+        os.makedirs(self._path_shared_dir, exist_ok=True)
 
         try:
-            fm.fontManager.addfont(self._data_font_path)  # type: ignore[attr-defined]
+            fm.fontManager.addfont(self._path_img_font)  # type: ignore[attr-defined]
         except Exception:
             logger.error("Failed to set custom font")
 
@@ -35,7 +38,7 @@ class Visuals(ABC):
         for paths in visuals_paths:
             path_without_bg, path_with_bg = paths
 
-            background = Image.open(self._image_bg_path).convert("RGBA")
+            background = Image.open(self._path_img_bg).convert("RGBA")
             image_without_bg = Image.open(path_without_bg).convert("RGBA")
 
             bg_w, bg_h = background.size
@@ -57,7 +60,7 @@ class Visuals(ABC):
 
 
 class Plot(Visuals):
-    _output_dir = "plots"
+    _img_output_dir = "plots"
     _plot_style = {
         "font.family": "Montserrat",
         "text.color": "#e9ecef",
@@ -81,12 +84,12 @@ class Plot(Visuals):
 
     def __init__(self, input_data: Any) -> None:
         super().__init__(input_data)
-        self._plot_dir = self._shared_dir / self._output_dir
+        self._plot_dir = self._path_shared_dir / self._img_output_dir
         os.makedirs(self._plot_dir, exist_ok=True)
 
 
 class Chart(Visuals):
-    _output_dir = "charts"
+    _img_output_dir = "charts"
     _plot_style = {
         "font.family": "Montserrat",
         "text.color": "#e9ecef",
@@ -110,5 +113,5 @@ class Chart(Visuals):
 
     def __init__(self, input_data: Any) -> None:
         super().__init__(input_data)
-        self._chart_dir = self._shared_dir / self._output_dir
+        self._chart_dir = self._path_shared_dir / self._img_output_dir
         os.makedirs(self._chart_dir, exist_ok=True)
