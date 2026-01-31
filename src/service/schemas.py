@@ -35,3 +35,11 @@ class GameSeriesResponse(BaseModel):
     @classmethod
     def normalize_market_type(cls, v: str) -> str:
         return v.replace("_", " ").title()
+
+
+class UnderdogSegment(BaseModel):
+    team: str
+    start_ts: int
+    end_ts: int
+    min_price: Decimal
+    min_price_ts: int
