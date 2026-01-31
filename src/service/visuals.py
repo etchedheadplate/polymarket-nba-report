@@ -225,7 +225,12 @@ class QuoteSeriesPlot(Plot, GameSeriesVisuals):
                 plt.xlabel(self._img_params["image_axis_x_label"])  # type: ignore[reportUnknownMemberType]
                 plt.ylabel(self._img_params["image_axis_y_label"])  # type: ignore[reportUnknownMemberType]
                 plt.grid(True)  # type: ignore[reportUnknownMemberType]
-                plt.legend(facecolor=self._img_params["legend_background_color"], edgecolor=self._img_params["legend_border_color"], framealpha=self._img_params["legend_transparency"], labelcolor=self._img_params["legend_labels_color"])  # type: ignore[reportUnknownMemberType]
+                plt.legend(  # type: ignore[reportUnknownMemberType]
+                    facecolor=self._img_params["legend_background_color"],
+                    edgecolor=self._img_params["legend_border_color"],
+                    framealpha=self._img_params["legend_transparency"],
+                    labelcolor=self._img_params["legend_labels_color"],
+                )
                 plt.tight_layout()
                 plt.savefig(path_without_bg, transparent=True)  # type: ignore[reportUnknownMemberType]
                 plt.close()
