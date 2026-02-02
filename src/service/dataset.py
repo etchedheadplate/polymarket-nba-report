@@ -4,16 +4,23 @@ from typing import Any
 import numpy as np
 
 from src.core.dataset import DataSet
-from src.service.schemas import GameSeriesPriceResponse, GameSeriesResponse, UnderdogSegment
+from src.database.connection import async_session_maker
+from src.service.repos import NBAGamesRepo
+from src.service.schemas import GameSeries, PriceSnapshot, UnderdogSegment
 
 
-class GameDataSet(DataSet):
-    def __init__(self, query_rows: list[Any]) -> None:
-        self._query_rows = query_rows
+class GameSeriesDataSet(DataSet):
+    def __init__(self, query: Any) -> None:
+        super().__init__(query)
 
-    def _detect_halftime(
-        self, guest_series: list[tuple[int, Decimal]], host_series: list[tuple[int, Decimal]]
-    ) -> tuple[int, int] | None:
+    async def query_database(self) -> None:
+        async with async_session_maker() as session:
+            self._rows = await NBAGamesRepo().get_games_series(session, self._query)
+
+    def _detect_halftime_segment(self, game_data: GameSeries) -> tuple[int, int] | None:
+        guest_series = [(p.timestamp, p.guest_price) for p in game_data.price_series if p.guest_price is not None]
+        host_series = [(p.timestamp, p.host_price) for p in game_data.price_series if p.host_price is not None]
+
         all_series = guest_series + host_series
         if not all_series:
             return None
@@ -59,8 +66,8 @@ class GameDataSet(DataSet):
 
         return int(best_start), int(best_start + halftime_duration)
 
-    def _extract_underdog_segments(self, game_data: GameSeriesResponse) -> list[UnderdogSegment]:
-        prices = [p for p in game_data.prices if p.guest_price is not None and p.host_price is not None]
+    def _extract_underdog_segments(self, game_data: GameSeries) -> list[UnderdogSegment]:
+        prices = [p for p in game_data.price_series if p.guest_price is not None and p.host_price is not None]
         if not prices:
             return []
 
@@ -120,8 +127,8 @@ class GameDataSet(DataSet):
 
         return segments
 
-    def process_data(self) -> dict[int, GameSeriesResponse]:
-        games_data_dict: dict[int, GameSeriesResponse] = {}
+    def process_data(self) -> dict[int, GameSeries]:
+        games_data_dict: dict[int, GameSeries] = {}
 
         def normalize_prices(buy: Decimal | None, sell: Decimal | None) -> Decimal | None:
             if buy is not None and sell is not None:
@@ -141,10 +148,10 @@ class GameDataSet(DataSet):
             guest_sell,
             host_buy,
             host_sell,
-        ) in self._query_rows:
+        ) in self._rows:
             game_entry = games_data_dict.setdefault(
                 game_id,
-                GameSeriesResponse(
+                GameSeries(
                     game_id=game_id,
                     game_date=game_date,
                     market_type=market_type,
@@ -152,12 +159,12 @@ class GameDataSet(DataSet):
                     host_team=host_team,
                     guest_score=guest_score,
                     host_score=host_score,
-                    prices=[],
+                    price_series=[],
                 ),
             )
 
-            game_entry.prices.append(
-                GameSeriesPriceResponse(
+            game_entry.price_series.append(
+                PriceSnapshot(
                     timestamp=timestamp,
                     guest_price=normalize_prices(guest_buy, guest_sell),
                     host_price=normalize_prices(host_buy, host_sell),
@@ -166,11 +173,9 @@ class GameDataSet(DataSet):
 
         for _, game_data in games_data_dict.items():
             underdog_segments = self._extract_underdog_segments(game_data)
-            game_data.tmp_underdog_segs = underdog_segments
+            game_data._underdog_segs = underdog_segments  # type: ignore[reportPrivateUsage]
 
-            guest_series = [(p.timestamp, p.guest_price) for p in game_data.prices if p.guest_price is not None]
-            host_series = [(p.timestamp, p.host_price) for p in game_data.prices if p.host_price is not None]
-            halftime_segment = self._detect_halftime(guest_series, host_series)
-            game_data.tmp_halftime_ts = halftime_segment
+            halftime_segment = self._detect_halftime_segment(game_data)
+            game_data._halftime_ts = halftime_segment  # type: ignore[reportPrivateUsage]
 
         return games_data_dict
