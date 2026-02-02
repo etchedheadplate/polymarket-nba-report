@@ -7,10 +7,10 @@ import matplotlib.pyplot as plt
 from src.config import settings
 from src.core.visuals import Plot
 from src.service.domain import NBATeamColor
-from src.service.schemas import GameSeriesResponse
+from src.service.schemas import GameSeries
 
 
-class QuoteSeriesPlot(Plot):
+class GameSeriesPlot(Plot):
     _visuals_title = "quote_series"
     _path_img_bg = settings.BACKGROUND_QUOTE_SERIES_PATH
     _img_params = {
@@ -48,15 +48,15 @@ class QuoteSeriesPlot(Plot):
         "underdog_time_label_transparency": 1.0,
     }
 
-    def __init__(self, games_data: dict[int, GameSeriesResponse]) -> None:
+    def __init__(self, games_data: dict[int, GameSeries]) -> None:
         super().__init__(games_data)
 
     def _make_transparent_data_image(self) -> list[tuple[Path, Path]]:
         visuals_paths: list[tuple[Path, Path]] = []
 
         for game_id, game_data in self._input_data.items():
-            guest_series = [(p.timestamp, p.guest_price) for p in game_data.prices if p.guest_price is not None]
-            host_series = [(p.timestamp, p.host_price) for p in game_data.prices if p.host_price is not None]
+            guest_series = [(p.timestamp, p.guest_price) for p in game_data.price_series if p.guest_price is not None]
+            host_series = [(p.timestamp, p.host_price) for p in game_data.price_series if p.host_price is not None]
 
             if not guest_series and not host_series:
                 continue
