@@ -1,7 +1,7 @@
 from datetime import date
 from decimal import Decimal
 
-from pydantic import BaseModel, PositiveInt, field_validator
+from pydantic import BaseModel, PositiveInt, computed_field, field_validator
 
 from src.service.domain import GameStatus, MarketType, NBATeam, NBATeamSide
 
@@ -21,6 +21,14 @@ class GameSeriesPriceResponse(BaseModel):
     host_price: Decimal | None
 
 
+class UnderdogSegment(BaseModel):
+    team: str
+    start_ts: int
+    end_ts: int
+    min_price: Decimal
+    min_price_ts: int
+
+
 class GameSeriesResponse(BaseModel):
     game_id: PositiveInt
     game_date: date
@@ -36,10 +44,15 @@ class GameSeriesResponse(BaseModel):
     def normalize_market_type(cls, v: str) -> str:
         return v.replace("_", " ").title()
 
+    _halftime_ts: tuple[int, int] | None = None
+    _underdog_segs: list[UnderdogSegment] | None = None
 
-class UnderdogSegment(BaseModel):
-    team: str
-    start_ts: int
-    end_ts: int
-    min_price: Decimal
-    min_price_ts: int
+    @computed_field
+    @property
+    def halftime_ts(self) -> tuple[int, int] | None:
+        return self._halftime_ts
+
+    @computed_field
+    @property
+    def underdog_segs(self) -> list[UnderdogSegment] | None:
+        return self._underdog_segs
