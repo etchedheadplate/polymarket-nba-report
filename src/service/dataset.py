@@ -166,11 +166,11 @@ class GameDataSet(DataSet):
 
         for _, game_data in games_data_dict.items():
             underdog_segments = self._extract_underdog_segments(game_data)
-            game_data._underdog_segs = underdog_segments
+            game_data.tmp_underdog_segs = underdog_segments
 
             guest_series = [(p.timestamp, p.guest_price) for p in game_data.prices if p.guest_price is not None]
             host_series = [(p.timestamp, p.host_price) for p in game_data.prices if p.host_price is not None]
             halftime_segment = self._detect_halftime(guest_series, host_series)
-            game_data._halftime_ts = halftime_segment
+            game_data.tmp_halftime_ts = halftime_segment
 
         return games_data_dict
