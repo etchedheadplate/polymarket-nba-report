@@ -1,129 +1,16 @@
 from datetime import datetime, timedelta
-from decimal import Decimal
 from pathlib import Path
 
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
-import numpy as np
 
 from src.config import settings
-from src.core.visuals import Plot, Visuals
+from src.core.visuals import Plot
 from src.service.domain import NBATeamColor
-from src.service.schemas import GameSeriesResponse, UnderdogSegment
+from src.service.schemas import GameSeriesResponse
 
 
-class GameSeriesVisuals(Visuals):
-    def _detect_halftime(
-        self, guest_series: list[tuple[int, Decimal]], host_series: list[tuple[int, Decimal]]
-    ) -> tuple[int, int] | None:
-        all_series = guest_series + host_series
-        if not all_series:
-            return None
-
-        all_series.sort(key=lambda p: p[0])
-        timestamps = np.array([ts for ts, _ in all_series])
-        prices_guest = np.array([float(guest_price) for _, guest_price in guest_series])
-        prices_host = np.array([float(host_price) for _, host_price in host_series])
-
-        step_seconds = 60
-        halftime_duration = 15 * 60
-
-        first_ts, last_ts = timestamps[0], timestamps[-1]
-        center_ts = first_ts + (last_ts - first_ts) / 2
-
-        best_start, best_score = None, float("inf")
-        current_start = first_ts
-
-        while current_start + halftime_duration <= last_ts:
-            current_end = current_start + halftime_duration
-            mask_guest = (np.array([ts for ts, _ in guest_series]) >= current_start) & (
-                np.array([ts for ts, _ in guest_series]) <= current_end
-            )
-            mask_host = (np.array([ts for ts, _ in host_series]) >= current_start) & (
-                np.array([ts for ts, _ in host_series]) <= current_end
-            )
-
-            vol_guest = np.nanstd(prices_guest[mask_guest]) if mask_guest.any() else 0
-            vol_host = np.nanstd(prices_host[mask_host]) if mask_host.any() else 0
-            vol_total = vol_guest + vol_host
-
-            distance_from_center = abs((current_start + current_end) / 2 - center_ts) / (last_ts - first_ts)
-            score = vol_total + distance_from_center
-
-            if score < best_score:
-                best_score = score
-                best_start = current_start
-
-            current_start += step_seconds
-
-        if best_start is None:
-            best_start = center_ts - halftime_duration / 2
-
-        return int(best_start), int(best_start + halftime_duration)
-
-    def _extract_underdog_segments(self, game_data: GameSeriesResponse) -> list[UnderdogSegment]:
-        prices = [p for p in game_data.prices if p.guest_price is not None and p.host_price is not None]
-        if not prices:
-            return []
-
-        guest_team = game_data.guest_team
-        host_team = game_data.host_team
-
-        first = prices[0]
-
-        if first.guest_price is None or first.host_price is None:
-            return []
-
-        current_team = guest_team if first.guest_price < first.host_price else host_team
-        current_start_ts = first.timestamp
-        current_min_price = first.guest_price if current_team == guest_team else first.host_price
-        current_min_ts = first.timestamp
-
-        segments: list[UnderdogSegment] = []
-
-        for p in prices[1:]:
-            guest_p = p.guest_price
-            host_p = p.host_price
-            if guest_p is None or host_p is None:
-                continue
-
-            new_team = guest_team if guest_p < host_p else host_team
-            underdog_price = guest_p if current_team == guest_team else host_p
-
-            if underdog_price < current_min_price:
-                current_min_price = underdog_price
-                current_min_ts = p.timestamp
-
-            if new_team != current_team:
-                segments.append(
-                    UnderdogSegment(
-                        team=current_team,
-                        start_ts=current_start_ts,
-                        end_ts=p.timestamp,
-                        min_price=current_min_price,
-                        min_price_ts=current_min_ts,
-                    )
-                )
-
-                current_team = new_team
-                current_start_ts = p.timestamp
-                current_min_price = guest_p if new_team == guest_team else host_p
-                current_min_ts = p.timestamp
-
-        segments.append(
-            UnderdogSegment(
-                team=current_team,
-                start_ts=current_start_ts,
-                end_ts=prices[-1].timestamp,
-                min_price=current_min_price,
-                min_price_ts=current_min_ts,
-            )
-        )
-
-        return segments
-
-
-class QuoteSeriesPlot(Plot, GameSeriesVisuals):
+class QuoteSeriesPlot(Plot):
     _visuals_title = "quote_series"
     _path_img_bg = settings.BACKGROUND_QUOTE_SERIES_PATH
     _img_params = {
@@ -191,6 +78,9 @@ class QuoteSeriesPlot(Plot, GameSeriesVisuals):
             game_date = game_data.game_date.isoformat()
             market_type = game_data.market_type
 
+            halftime_segment = game_data.halftime_ts
+            underdog_segments = game_data.underdog_segs
+
             path_without_bg = self._plot_dir / f"tmp_{self._visuals_title}_{game_id}.{self._img_ext_transp}"
             path_with_bg = (
                 self._plot_dir
@@ -200,7 +90,6 @@ class QuoteSeriesPlot(Plot, GameSeriesVisuals):
             if path_with_bg.exists():
                 continue
 
-            underdog_segments = self._extract_underdog_segments(game_data)
             if not underdog_segments:
                 continue
 
@@ -220,7 +109,6 @@ class QuoteSeriesPlot(Plot, GameSeriesVisuals):
                     x_rel = [datetime(1900, 1, 1) + timedelta(seconds=ts - match_start_ts) for ts in x]
                     plt.plot(x_rel, y, label=host_team, color=host_color, linewidth=self._img_params["team_probability_line_width"])  # type: ignore[reportUnknownMemberType]
 
-                halftime_segment = self._detect_halftime(guest_series, host_series)
                 if halftime_segment:
                     ht_start_ts, ht_end_ts = halftime_segment
                     plt.axvspan(  # type: ignore[reportUnknownMemberType]
@@ -250,7 +138,7 @@ class QuoteSeriesPlot(Plot, GameSeriesVisuals):
                     underdog_color = guest_color if seg.team == guest_team else host_color
 
                     plt.axvspan(seg_start, seg_end, color=underdog_color, alpha=self._img_params["underdog_fill_transparency"], zorder=0)  # type: ignore[reportUnknownMemberType]
-                    plt.axvline(
+                    plt.axvline(  # type: ignore[reportUnknownMemberType]
                         seg_start,  # type: ignore[arg-type]
                         color=underdog_color,
                         linestyle=self._img_params["underdog_fill_border_style"],
