@@ -5,8 +5,8 @@ from src.core.reports import Report
 from src.database.connection import async_session_maker
 from src.service.repos import NBAGamesRepo
 from src.service.schemas import GameSeriesPriceResponse, GameSeriesQuery, GameSeriesResponse
-from src.service.summary import OddsFlipSummary, QuoteSeriesSummary
-from src.service.visuals import OddsFlipChart, QuoteSeriesPlot
+from src.service.summary import QuoteSeriesSummary
+from src.service.visuals import QuoteSeriesPlot
 
 
 class GameSeriesReport(Report):
@@ -67,14 +67,6 @@ class GameSeriesReport(Report):
 class QuoteSeriesReport(GameSeriesReport):
     _visuals_cls = QuoteSeriesPlot
     _summary_cls = QuoteSeriesSummary
-
-    def __init__(self, query: GameSeriesQuery) -> None:
-        super().__init__(query)
-
-
-class OddsFlipReport(GameSeriesReport):
-    _visuals_cls = OddsFlipChart
-    _summary_cls = OddsFlipSummary
 
     def __init__(self, query: GameSeriesQuery) -> None:
         super().__init__(query)
