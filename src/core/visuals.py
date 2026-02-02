@@ -14,7 +14,7 @@ class Visuals(ABC):
     _visuals_title: str
     _img_output_dir: str
     _img_ext_transp: str = "png"
-    _img_ext_final: str = "png"
+    _img_ext_final: str = "jpg"
     _path_shared_dir: Path = settings.SHARED_DIR
     _path_img_font: Path = settings.VISUALS_FONT_PATH
     _path_img_bg: Path
@@ -45,6 +45,7 @@ class Visuals(ABC):
             image_without_bg = image_without_bg.resize((bg_w, bg_h))
 
             image_with_bg = Image.alpha_composite(background, image_without_bg)
+            image_with_bg = image_with_bg.convert("RGB")
             image_with_bg.save(path_with_bg)
             logger.debug("Created: %s", path_with_bg)
 
