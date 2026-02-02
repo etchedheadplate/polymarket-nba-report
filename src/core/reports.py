@@ -1,4 +1,4 @@
-from abc import ABC, abstractmethod
+from abc import ABC
 from pathlib import Path
 from typing import Any
 
@@ -18,11 +18,9 @@ class Report(ABC):
         self.visuals: list[Path] = []
         self.summary: Path = Path()
 
-    @abstractmethod
-    async def _query_database(self) -> list[Any]: ...
-
-    def _prepare_data(self, query_rows: list[Any]) -> Any:
-        dataset_processor = self._dataset_cls(query_rows)
+    async def _prepare_data(self) -> Any:
+        dataset_processor = self._dataset_cls(self.query)
+        await dataset_processor.query_database()
         return dataset_processor.process_data()
 
     def _create_visuals(self, procesesed_items: Any) -> None:
@@ -34,8 +32,7 @@ class Report(ABC):
         self.summary = summary_processor.create_summary()
 
     async def make_report(self) -> Any:
-        query_rows = await self._query_database()
-        dataset = self._prepare_data(query_rows)
-        logger.debug("Processed %s items from %s rows", len(dataset), len(query_rows))
+        dataset = await self._prepare_data()
+        logger.debug("Processed %s items", len(dataset))
         self._create_visuals(dataset)
         self._create_summary(dataset)
