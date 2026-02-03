@@ -3,13 +3,58 @@ from typing import Any
 
 import numpy as np
 
-from src.service.schemas import GameSeries, HalftimeSegment, PriceSnapshot, UnderdogSegment
+from src.service.schemas import GameSeries, HalftimeSegment, PriceChange, PriceSnapshot, UnderdogSegment
 
 
 class GameProcessor:
-    def __init__(self, query: Any, rows: list[Any]) -> None:
-        self._query = query
+    def __init__(self, rows: list[Any]) -> None:
         self._rows = rows if rows else []
+
+    def extract_price_change_segments(
+        self,
+        game_data: GameSeries,
+        start_price: Decimal,
+        end_price: Decimal,
+    ) -> list[PriceChange]:
+        result: list[PriceChange] = []
+
+        team_series = [
+            (game_data.guest_team, "guest_price"),
+            (game_data.host_team, "host_price"),
+        ]
+
+        for team, price_attr in team_series:
+            series: list[tuple[int, Decimal]] = []
+
+            for p in game_data.price_series:
+                price = getattr(p, price_attr)
+                if price is not None:
+                    series.append((p.timestamp, price))
+
+            in_segment = False
+            start_ts = 0
+            start_p = Decimal(0)
+
+            for ts, price in sorted(series):
+                if not in_segment:
+                    if price <= start_price:
+                        in_segment = True
+                        start_ts = ts
+                        start_p = price
+                else:
+                    if price >= end_price:
+                        result.append(
+                            PriceChange(
+                                team=team,
+                                start_price=start_p,
+                                start_ts=start_ts,
+                                end_price=price,
+                                end_ts=ts,
+                            )
+                        )
+                        in_segment = False
+
+        return result
 
     def extract_halftime_segment(self, game_data: GameSeries) -> HalftimeSegment | None:
         guest_series = [(p.timestamp, p.guest_price) for p in game_data.price_series if p.guest_price is not None]
