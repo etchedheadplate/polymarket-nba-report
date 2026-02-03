@@ -3,7 +3,7 @@ from typing import Any
 
 import numpy as np
 
-from src.service.schemas import GameSeries, PriceSnapshot, UnderdogSegment
+from src.service.schemas import GameSeries, HalftimeSegment, PriceSnapshot, UnderdogSegment
 
 
 class GameProcessor:
@@ -11,7 +11,7 @@ class GameProcessor:
         self._query = query
         self._rows = rows if rows else []
 
-    def extract_halftime_segment(self, game_data: GameSeries) -> tuple[int, int] | None:
+    def extract_halftime_segment(self, game_data: GameSeries) -> HalftimeSegment | None:
         guest_series = [(p.timestamp, p.guest_price) for p in game_data.price_series if p.guest_price is not None]
         host_series = [(p.timestamp, p.host_price) for p in game_data.price_series if p.host_price is not None]
 
@@ -58,7 +58,9 @@ class GameProcessor:
         if best_start is None:
             best_start = center_ts - halftime_duration / 2
 
-        return int(best_start), int(best_start + halftime_duration)
+        halftime_segment = HalftimeSegment(start_ts=int(best_start), end_ts=int(best_start + halftime_duration))
+
+        return halftime_segment
 
     def extract_underdog_segments(self, game_data: GameSeries) -> list[UnderdogSegment]:
         prices = [p for p in game_data.price_series if p.guest_price is not None and p.host_price is not None]

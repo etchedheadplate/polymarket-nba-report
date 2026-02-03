@@ -29,6 +29,11 @@ class PriceChange(BaseModel):
     end_ts: int
 
 
+class HalftimeSegment(BaseModel):
+    start_ts: int
+    end_ts: int
+
+
 class UnderdogSegment(BaseModel):
     team: str
     start_ts: int
@@ -52,12 +57,12 @@ class GameSeries(BaseModel):
     def normalize_market_type(cls, v: str) -> str:
         return v.replace("_", " ").title()
 
-    _halftime_ts: tuple[int, int] | None = PrivateAttr(default=None)
+    _halftime_ts: HalftimeSegment | None = PrivateAttr(default=None)
     _underdog_segs: list[UnderdogSegment] | None = PrivateAttr(default=None)
 
     @computed_field
     @property
-    def halftime_ts(self) -> tuple[int, int] | None:
+    def halftime_ts(self) -> HalftimeSegment | None:
         return self._halftime_ts
 
     @computed_field
