@@ -5,12 +5,12 @@ import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 
 from src.config import settings
-from src.core.visuals import Plot
+from src.core.visuals import Chart, Plot
 from src.service.domain import NBATeamColor
-from src.service.schemas import GameSeries
+from src.service.schemas import GameData
 
 
-class GameSeriesPlot(Plot):
+class QuoteSeriesPlot(Plot):
     _visuals_title = "quote_series"
     _path_img_bg = settings.BACKGROUND_QUOTE_SERIES_PATH
     _img_params = {
@@ -48,7 +48,7 @@ class GameSeriesPlot(Plot):
         "underdog_time_label_transparency": 1.0,
     }
 
-    def __init__(self, games_data: dict[int, GameSeries]) -> None:
+    def __init__(self, games_data: dict[int, GameData]) -> None:
         super().__init__(games_data)
 
     def _make_transparent_data_image(self) -> list[tuple[Path, Path]]:
@@ -206,3 +206,12 @@ class GameSeriesPlot(Plot):
                 visuals_paths.append((path_without_bg, path_with_bg))
 
         return visuals_paths
+
+
+class PriceWindowChart(Chart):
+    _visuals_title = "price_window"
+    _path_img_bg = settings.BACKGROUND_PRICE_WINDOW_PATH
+    _img_params = {}
+
+    def __init__(self, games_data: dict[int, GameData]) -> None:
+        super().__init__(games_data)

@@ -3,7 +3,7 @@ from typing import Any
 
 import numpy as np
 
-from src.service.schemas import GameSeries, HalftimeSegment, PriceChange, PriceSnapshot, UnderdogSegment
+from src.service.schemas import GameData, HalftimeSegment, PriceChange, PriceSnapshot, UnderdogSegment
 
 
 class GameProcessor:
@@ -12,7 +12,7 @@ class GameProcessor:
 
     def extract_price_change_segments(
         self,
-        game_data: GameSeries,
+        game_data: GameData,
         start_price: Decimal,
         end_price: Decimal,
     ) -> list[PriceChange]:
@@ -56,7 +56,7 @@ class GameProcessor:
 
         return result
 
-    def extract_halftime_segment(self, game_data: GameSeries) -> HalftimeSegment | None:
+    def extract_halftime_segment(self, game_data: GameData) -> HalftimeSegment | None:
         guest_series = [(p.timestamp, p.guest_price) for p in game_data.price_series if p.guest_price is not None]
         host_series = [(p.timestamp, p.host_price) for p in game_data.price_series if p.host_price is not None]
 
@@ -107,7 +107,7 @@ class GameProcessor:
 
         return halftime_segment
 
-    def extract_underdog_segments(self, game_data: GameSeries) -> list[UnderdogSegment]:
+    def extract_underdog_segments(self, game_data: GameData) -> list[UnderdogSegment]:
         prices = [p for p in game_data.price_series if p.guest_price is not None and p.host_price is not None]
         if not prices:
             return []
@@ -168,8 +168,8 @@ class GameProcessor:
 
         return segments
 
-    def create_data_dict(self) -> dict[int, GameSeries]:
-        games_data_dict: dict[int, GameSeries] = {}
+    def create_data_dict(self) -> dict[int, GameData]:
+        games_data_dict: dict[int, GameData] = {}
 
         def normalize_prices(buy: Decimal | None, sell: Decimal | None) -> Decimal | None:
             if buy is not None and sell is not None:
@@ -192,7 +192,7 @@ class GameProcessor:
         ) in self._rows:
             game_entry = games_data_dict.setdefault(
                 game_id,
-                GameSeries(
+                GameData(
                     game_id=game_id,
                     game_date=game_date,
                     market_type=market_type,

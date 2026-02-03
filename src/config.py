@@ -14,7 +14,7 @@ class Settings(BaseSettings):
 
     VISUALS_FONT_PATH: Path
     BACKGROUND_QUOTE_SERIES_PATH: Path
-    BACKGROUND_ODDS_FLIP_PATH: Path
+    BACKGROUND_PRICE_WINDOW_PATH: Path
 
     model_config = SettingsConfigDict(env_file=".env")
 
