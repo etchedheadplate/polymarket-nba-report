@@ -106,7 +106,7 @@ class GameSeriesDataSet(DataSet):
                         start_ts=current_start_ts,
                         end_ts=p.timestamp,
                         min_price=current_min_price,
-                        min_price_ts=current_min_ts,
+                        min_ts=current_min_ts,
                     )
                 )
 
@@ -121,7 +121,7 @@ class GameSeriesDataSet(DataSet):
                 start_ts=current_start_ts,
                 end_ts=prices[-1].timestamp,
                 min_price=current_min_price,
-                min_price_ts=current_min_ts,
+                min_ts=current_min_ts,
             )
         )
 
