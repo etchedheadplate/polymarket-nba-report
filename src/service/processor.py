@@ -13,48 +13,42 @@ class GameProcessor:
     def extract_price_change_segments(
         self,
         game_data: GameData,
+        team_name: str,
         start_price: Decimal,
         end_price: Decimal,
     ) -> list[PriceChange]:
-        result: list[PriceChange] = []
+        price_change_segments: list[PriceChange] = []
 
-        team_series = [
-            (game_data.guest_team, "guest_price"),
-            (game_data.host_team, "host_price"),
-        ]
+        series: list[tuple[int, Decimal]] = []
+        for p in game_data.price_series:
+            price = p.guest_price if team_name == game_data.guest_team else p.host_price
+            if price is not None:
+                series.append((p.timestamp, price))
 
-        for team, price_attr in team_series:
-            series: list[tuple[int, Decimal]] = []
+        in_segment = False
+        start_ts = 0
+        start_p = Decimal(0)
 
-            for p in game_data.price_series:
-                price = getattr(p, price_attr)
-                if price is not None:
-                    series.append((p.timestamp, price))
-
-            in_segment = False
-            start_ts = 0
-            start_p = Decimal(0)
-
-            for ts, price in sorted(series):
-                if not in_segment:
-                    if price <= start_price:
-                        in_segment = True
-                        start_ts = ts
-                        start_p = price
-                else:
-                    if price >= end_price:
-                        result.append(
-                            PriceChange(
-                                team=team,
-                                start_price=start_p,
-                                start_ts=start_ts,
-                                end_price=price,
-                                end_ts=ts,
-                            )
+        for ts, price in sorted(series):
+            if not in_segment:
+                if price <= start_price:
+                    in_segment = True
+                    start_ts = ts
+                    start_p = price
+            else:
+                if price >= end_price:
+                    price_change_segments.append(
+                        PriceChange(
+                            team=team_name,
+                            start_price=start_p,
+                            start_ts=start_ts,
+                            end_price=price,
+                            end_ts=ts,
                         )
-                        in_segment = False
+                    )
+                    in_segment = False
 
-        return result
+        return price_change_segments
 
     def extract_halftime_segment(self, game_data: GameData) -> HalftimeSegment | None:
         guest_series = [(p.timestamp, p.guest_price) for p in game_data.price_series if p.guest_price is not None]
@@ -125,7 +119,7 @@ class GameProcessor:
         current_min_price = first.guest_price if current_team == guest_team else first.host_price
         current_min_ts = first.timestamp
 
-        segments: list[UnderdogSegment] = []
+        underdog_segments: list[UnderdogSegment] = []
 
         for p in prices[1:]:
             guest_p = p.guest_price
@@ -141,7 +135,7 @@ class GameProcessor:
                 current_min_ts = p.timestamp
 
             if new_team != current_team:
-                segments.append(
+                underdog_segments.append(
                     UnderdogSegment(
                         team=current_team,
                         start_ts=current_start_ts,
@@ -156,7 +150,7 @@ class GameProcessor:
                 current_min_price = guest_p if new_team == guest_team else host_p
                 current_min_ts = p.timestamp
 
-        segments.append(
+        underdog_segments.append(
             UnderdogSegment(
                 team=current_team,
                 start_ts=current_start_ts,
@@ -166,7 +160,7 @@ class GameProcessor:
             )
         )
 
-        return segments
+        return underdog_segments
 
     def create_data_dict(self) -> dict[int, GameData]:
         games_data_dict: dict[int, GameData] = {}
