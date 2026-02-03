@@ -110,14 +110,15 @@ class GameSeriesPlot(Plot):
                     plt.plot(x_rel, y, label=host_team, color=host_color, linewidth=self._img_params["team_probability_line_width"])  # type: ignore[reportUnknownMemberType]
 
                 if halftime_segment:
-                    ht_start_ts, ht_end_ts = halftime_segment
                     plt.axvspan(  # type: ignore[reportUnknownMemberType]
-                        datetime(1900, 1, 1) + timedelta(seconds=ht_start_ts - match_start_ts),  # type: ignore[arg-type]
-                        datetime(1900, 1, 1) + timedelta(seconds=ht_end_ts - match_start_ts),  # type: ignore[arg-type]
+                        datetime(1900, 1, 1) + timedelta(seconds=halftime_segment.start_ts - match_start_ts),  # type: ignore[arg-type]
+                        datetime(1900, 1, 1) + timedelta(seconds=halftime_segment.end_ts - match_start_ts),  # type: ignore[arg-type]
                         color=self._img_params["halftime_color"],
                         alpha=self._img_params["halftime_fill_transparency"],
                     )
-                    mid_ht = datetime(1900, 1, 1) + timedelta(seconds=(ht_start_ts + ht_end_ts) / 2 - match_start_ts)
+                    mid_ht = datetime(1900, 1, 1) + timedelta(
+                        seconds=(halftime_segment.start_ts + halftime_segment.end_ts) / 2 - match_start_ts
+                    )
                     plt.text(  # type: ignore[reportUnknownMemberType]
                         mid_ht,  # type: ignore[arg-type]
                         self._img_params["halftime_label_axis_y_ancor"],
@@ -130,24 +131,27 @@ class GameSeriesPlot(Plot):
                         clip_on=True,
                     )
 
-                for seg in underdog_segments:
-                    seg_start = datetime(1900, 1, 1) + timedelta(seconds=seg.start_ts - match_start_ts)
-                    seg_end = datetime(1900, 1, 1) + timedelta(seconds=seg.end_ts - match_start_ts)
-                    seg_mid = datetime(1900, 1, 1) + timedelta(seconds=(seg.start_ts + seg.end_ts) / 2 - match_start_ts)
+                for u_seg in underdog_segments:
+                    u_seg_start = datetime(1900, 1, 1) + timedelta(seconds=u_seg.start_ts - match_start_ts)
+                    u_seg_end = datetime(1900, 1, 1) + timedelta(seconds=u_seg.end_ts - match_start_ts)
+                    u_seg_mid = datetime(1900, 1, 1) + timedelta(
+                        seconds=(u_seg.start_ts + u_seg.end_ts) / 2 - match_start_ts
+                    )
+                    u_seg_duration_min = int((u_seg.end_ts - u_seg.start_ts) // 60)
 
-                    underdog_color = guest_color if seg.team == guest_team else host_color
+                    underdog_color = guest_color if u_seg.team == guest_team else host_color
 
-                    plt.axvspan(seg_start, seg_end, color=underdog_color, alpha=self._img_params["underdog_fill_transparency"], zorder=0)  # type: ignore[reportUnknownMemberType]
+                    plt.axvspan(u_seg_start, u_seg_end, color=underdog_color, alpha=self._img_params["underdog_fill_transparency"], zorder=0)  # type: ignore[reportUnknownMemberType]
                     plt.axvline(  # type: ignore[reportUnknownMemberType]
-                        seg_start,  # type: ignore[arg-type]
+                        u_seg_start,  # type: ignore[arg-type]
                         color=underdog_color,
                         linestyle=self._img_params["underdog_fill_border_style"],
                         alpha=self._img_params["underdog_fill_border_transparency"],
                     )
 
                     plt.scatter(  # type: ignore[reportUnknownMemberType]
-                        datetime(1900, 1, 1) + timedelta(seconds=seg.min_ts - match_start_ts),  # type: ignore[arg-type]
-                        float(seg.min_price),
+                        datetime(1900, 1, 1) + timedelta(seconds=u_seg.min_ts - match_start_ts),  # type: ignore[arg-type]
+                        float(u_seg.min_price),
                         color=underdog_color,
                         edgecolor=self._img_params["underdog_dot_border_color"],
                         linewidths=self._img_params["underdog_dot_sborder_width"],
@@ -157,8 +161,8 @@ class GameSeriesPlot(Plot):
                     )
 
                     plt.annotate(  # type: ignore[reportUnknownMemberType]
-                        f"{float(seg.min_price):.3f}",
-                        xy=(datetime(1900, 1, 1) + timedelta(seconds=seg.min_ts - match_start_ts), float(seg.min_price)),  # type: ignore[arg-type]
+                        f"{float(u_seg.min_price):.3f}",
+                        xy=(datetime(1900, 1, 1) + timedelta(seconds=u_seg.min_ts - match_start_ts), float(u_seg.min_price)),  # type: ignore[arg-type]
                         xytext=self._img_params["underdog_dot_label_offset"],
                         textcoords="offset points",
                         ha=self._img_params["underdog_dot_label_axis_alignment"],
@@ -167,14 +171,13 @@ class GameSeriesPlot(Plot):
                         color=self._img_params["underdog_label_color"],
                     )
 
-                    seg_duration_min = int((seg.end_ts - seg.start_ts) // 60)
                     plt.text(  # type: ignore[reportUnknownMemberType]
-                        seg_mid,  # type: ignore[arg-type]
+                        u_seg_mid,  # type: ignore[arg-type]
                         self._img_params["underdog_time_label_axis_y_ancor"],
-                        f"{seg_duration_min} min" if seg_duration_min > 2 else "",
+                        f"{u_seg_duration_min} min" if u_seg_duration_min > 2 else "",
                         ha=self._img_params["underdog_time_label_axis_alignment"],
                         va=self._img_params["underdog_time_label_axis_alignment"],
-                        rotation=90 if (seg.end_ts - seg.start_ts) < 8 * 60 else 0,
+                        rotation=90 if (u_seg.end_ts - u_seg.start_ts) < 8 * 60 else 0,
                         fontsize=self._img_params["underdog_time_label_font_size"],
                         color=self._img_params["underdog_label_color"],
                         alpha=self._img_params["underdog_time_label_transparency"],
