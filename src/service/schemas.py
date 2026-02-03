@@ -21,6 +21,14 @@ class PriceSnapshot(BaseModel):
     host_price: Decimal | None
 
 
+class PriceChange(BaseModel):
+    team: str
+    min_price: Decimal
+    min_price_ts: int
+    max_price: Decimal
+    max_price_ts: int
+
+
 class UnderdogSegment(BaseModel):
     team: str
     start_ts: int
