@@ -59,15 +59,21 @@ class GameData(BaseModel):
     def normalize_market_type(cls, v: str) -> str:
         return v.replace("_", " ").title()
 
-    _halftime_ts: HalftimeSegment | None = PrivateAttr(default=None)
+    _halftime_seg: HalftimeSegment | None = PrivateAttr(default=None)
     _underdog_segs: list[UnderdogSegment] | None = PrivateAttr(default=None)
+    _price_change_segs: list[UnderdogSegment] | None = PrivateAttr(default=None)
 
     @computed_field
     @property
-    def halftime_ts(self) -> HalftimeSegment | None:
-        return self._halftime_ts
+    def halftime_seg(self) -> HalftimeSegment | None:
+        return self._halftime_seg
 
     @computed_field
     @property
     def underdog_segs(self) -> list[UnderdogSegment] | None:
         return self._underdog_segs
+
+    @computed_field
+    @property
+    def price_change_segs(self) -> list[UnderdogSegment] | None:
+        return self._price_change_segs
