@@ -1,4 +1,3 @@
-from decimal import Decimal
 from typing import Any
 
 from src.core.dataset import DataSet
@@ -24,10 +23,10 @@ class QuoteSeriesDataSet(DataSet):
         game_series = processor.create_data_dict()
 
         for _, game in game_series.items():
-            halftime_segment = processor.extract_halftime_segment(game)
-            game._halftime_ts = halftime_segment  # type: ignore[reportPrivateUsage]
+            halftime_segment = processor.extract_halftime_segment(game_data=game)
+            game._halftime_seg = halftime_segment  # type: ignore[reportPrivateUsage]
 
-            underdog_segments = processor.extract_underdog_segments(game)
+            underdog_segments = processor.extract_underdog_segments(game_data=game)
             game._underdog_segs = underdog_segments  # type: ignore[reportPrivateUsage]
 
         return game_series
@@ -49,9 +48,13 @@ class PriceWindowDataSet(DataSet):
         game_series = processor.create_data_dict()
 
         for _, game in game_series.items():
+            start_price = self._query.start_price
+            end_price = self._query.end_price
+            team_name = self._query.team.name
+
             price_change_segments = processor.extract_price_change_segments(
-                game, start_price=Decimal("0.1"), end_price=Decimal("0.3")
+                game_data=game, start_price=start_price, end_price=end_price, team_name=team_name
             )
-            print(_, price_change_segments)
+            game._price_change_segs = price_change_segments  # type: ignore[reportPrivateUsage]
 
         return game_series
