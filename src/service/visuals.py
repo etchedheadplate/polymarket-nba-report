@@ -185,7 +185,7 @@ class GameSeriesPlot(Plot):
                 plt.ylim(*self._img_params["image_axis_y_limit"])  # type: ignore[reportUnknownMemberType]
                 plt.xlim(datetime(1900, 1, 1), datetime(1900, 1, 1) + timedelta(seconds=match_end_ts - match_start_ts))  # type: ignore[reportUnknownMemberType]
 
-                plt.title(f"{game_date} • {guest_team} {guest_score}:{host_score} {host_team} • {market_type}")  # type: ignore[reportUnknownMemberType]
+                plt.title(f"{game_date} • {guest_team} {guest_score}:{host_score} {host_team} • {market_type} {game_id}")  # type: ignore[reportUnknownMemberType]
                 plt.xlabel(self._img_params["image_axis_x_label"])  # type: ignore[reportUnknownMemberType]
                 plt.ylabel(self._img_params["image_axis_y_label"])  # type: ignore[reportUnknownMemberType]
                 plt.grid(True)  # type: ignore[reportUnknownMemberType]
