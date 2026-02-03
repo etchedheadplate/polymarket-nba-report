@@ -23,10 +23,10 @@ class PriceSnapshot(BaseModel):
 
 class PriceChange(BaseModel):
     team: str
-    min_price: Decimal
-    min_price_ts: int
-    max_price: Decimal
-    max_price_ts: int
+    start_price: Decimal
+    start_ts: int
+    end_price: Decimal
+    end_ts: int
 
 
 class UnderdogSegment(BaseModel):
@@ -34,7 +34,7 @@ class UnderdogSegment(BaseModel):
     start_ts: int
     end_ts: int
     min_price: Decimal
-    min_price_ts: int
+    min_ts: int
 
 
 class GameSeries(BaseModel):
