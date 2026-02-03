@@ -1,6 +1,6 @@
 from src.core.reports import Report
 from src.service.dataset import PriceWindowDataSet, QuoteSeriesDataSet
-from src.service.schemas import QuoteSeriesQuery
+from src.service.schemas import ReportQuery
 from src.service.summary import PriceWindowSummary, QuoteSeriesSummary
 from src.service.visuals import PriceWindowChart, QuoteSeriesPlot
 
@@ -10,7 +10,7 @@ class QuoteSeriesReport(Report):
     _visuals_cls = QuoteSeriesPlot
     _summary_cls = QuoteSeriesSummary
 
-    def __init__(self, query: QuoteSeriesQuery) -> None:
+    def __init__(self, query: ReportQuery) -> None:
         super().__init__(query)
 
 
@@ -19,5 +19,5 @@ class PriceWindowReport(Report):
     _visuals_cls = PriceWindowChart
     _summary_cls = PriceWindowSummary
 
-    def __init__(self, query: QuoteSeriesQuery) -> None:
+    def __init__(self, query: ReportQuery) -> None:
         super().__init__(query)

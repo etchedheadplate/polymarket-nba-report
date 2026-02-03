@@ -5,13 +5,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database.models import NBAGamesModel, NBAMarketsModel, NBAPricesModel
 from src.service.domain import NBATeamSide
-from src.service.schemas import QuoteSeriesQuery
+from src.service.schemas import ReportQuery
 
 
 class NBAGamesRepo:
-    async def get_games_series(self, session: AsyncSession, query: QuoteSeriesQuery) -> list[Any]:
+    async def get_games_series(self, session: AsyncSession, query: ReportQuery) -> list[Any]:
 
-        def build_team_conditions(query: QuoteSeriesQuery):
+        def build_team_conditions(query: ReportQuery):
             team = query.team.name
 
             if not query.team_vs:

@@ -6,13 +6,15 @@ from pydantic import BaseModel, PositiveInt, PrivateAttr, computed_field, field_
 from src.service.domain import GameStatus, MarketType, NBATeam, NBATeamSide
 
 
-class QuoteSeriesQuery(BaseModel):
+class ReportQuery(BaseModel):
     game_status: GameStatus = GameStatus.FINISHED
     market_type: MarketType = MarketType.moneyline
     limit: PositiveInt | None = None
     team: NBATeam
     team_vs: NBATeam | None = None
     team_side: NBATeamSide | None = None
+    start_price: Decimal | None = None
+    end_price: Decimal | None = None
 
 
 class PriceSnapshot(BaseModel):
