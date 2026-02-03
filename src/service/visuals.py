@@ -146,18 +146,19 @@ class GameSeriesPlot(Plot):
                     )
 
                     plt.scatter(  # type: ignore[reportUnknownMemberType]
-                        datetime(1900, 1, 1) + timedelta(seconds=seg.min_price_ts - match_start_ts),  # type: ignore[arg-type]
+                        datetime(1900, 1, 1) + timedelta(seconds=seg.min_ts - match_start_ts),  # type: ignore[arg-type]
                         float(seg.min_price),
                         color=underdog_color,
                         edgecolor=self._img_params["underdog_dot_border_color"],
                         linewidths=self._img_params["underdog_dot_sborder_width"],
                         s=self._img_params["underdog_dot_size"],
                         zorder=5,
+                        clip_on=False,
                     )
 
                     plt.annotate(  # type: ignore[reportUnknownMemberType]
                         f"{float(seg.min_price):.3f}",
-                        xy=(datetime(1900, 1, 1) + timedelta(seconds=seg.min_price_ts - match_start_ts), float(seg.min_price)),  # type: ignore[arg-type]
+                        xy=(datetime(1900, 1, 1) + timedelta(seconds=seg.min_ts - match_start_ts), float(seg.min_price)),  # type: ignore[arg-type]
                         xytext=self._img_params["underdog_dot_label_offset"],
                         textcoords="offset points",
                         ha=self._img_params["underdog_dot_label_axis_alignment"],
