@@ -78,7 +78,7 @@ class QuoteSeriesPlot(Plot):
             game_date = game_data.game_date.isoformat()
             market_type = game_data.market_type
 
-            halftime_segment = game_data.halftime_ts
+            halftime_segment = game_data.halftime_seg
             underdog_segments = game_data.underdog_segs
 
             path_without_bg = self._plot_dir / f"tmp_{self._visuals_title}_{game_id}.{self._img_ext_transp}"
@@ -211,7 +211,66 @@ class QuoteSeriesPlot(Plot):
 class PriceWindowChart(Chart):
     _visuals_title = "price_window"
     _path_img_bg = settings.BACKGROUND_PRICE_WINDOW_PATH
-    _img_params = {}
+    _img_params = {
+        "team_fallback_color_guest": "#6c757d",
+        "team_fallback_color_host": "#ced4da",
+    }
 
     def __init__(self, games_data: dict[int, GameData]) -> None:
         super().__init__(games_data)
+
+    def _make_transparent_data_image(self) -> list[tuple[Path, Path]]:
+        visuals_paths: list[tuple[Path, Path]] = []
+
+        all_price_windows = {}
+
+        for game_id, game_data in self._input_data.items():
+            price_changes = game_data.price_change_segs
+            if not price_changes:
+                continue
+
+            guest_team = game_data.guest_team
+            host_team = game_data.host_team
+            guest_score = game_data.guest_score
+            host_score = game_data.host_score
+            game_date = game_data.game_date
+
+            team = price_changes[0].team
+            team_vs = guest_team if guest_team != team else host_team
+            team_score = guest_score if guest_team == team else host_score
+            team_vs_score = host_score if host_team != team else guest_score
+            is_guest = team == guest_team
+            has_won = team_score > team_vs_score
+
+            windows: list[int] = []
+            for change in price_changes:
+                team = change.team
+                team_vs = guest_team if guest_team != team else host_team
+                windows.append(change.end_ts - change.start_ts)
+
+            game_stats = {
+                "game_id": game_id,
+                "game_date": game_date,
+                "is_guest": is_guest,
+                "team_vs": team_vs,
+                "windows": windows,
+                "has_won": has_won,
+            }
+
+            all_price_windows.setdefault(team_vs, {})[game_id] = game_stats
+
+            guest_color_scheme = getattr(NBATeamColor, guest_team, None)
+            guest_color = (
+                guest_color_scheme["guest"] if guest_color_scheme else self._img_params["team_fallback_color_guest"]
+            )
+            host_color_scheme = getattr(NBATeamColor, host_team, None)
+            host_color = (
+                host_color_scheme["host"] if host_color_scheme else self._img_params["team_fallback_color_host"]
+            )
+
+            print(guest_color, host_color)
+
+        for team, data in all_price_windows.items():
+            print(team, len(data))
+
+        return visuals_paths
