@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     DB_PASS: str
 
     SHARED_DIR: Path
+    TEAM_LOGO_DIR: Path
 
     VISUALS_FONT_PATH: Path
     BACKGROUND_QUOTE_SERIES_PATH: Path
