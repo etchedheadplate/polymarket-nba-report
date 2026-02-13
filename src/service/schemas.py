@@ -61,7 +61,7 @@ class GameData(BaseModel):
 
     _halftime_seg: HalftimeSegment | None = PrivateAttr(default=None)
     _underdog_segs: list[UnderdogSegment] | None = PrivateAttr(default=None)
-    _price_change_segs: list[UnderdogSegment] | None = PrivateAttr(default=None)
+    _price_change_segs: list[PriceChange] | None = PrivateAttr(default=None)
 
     @computed_field
     @property
@@ -75,5 +75,5 @@ class GameData(BaseModel):
 
     @computed_field
     @property
-    def price_change_segs(self) -> list[UnderdogSegment] | None:
+    def price_change_segs(self) -> list[PriceChange] | None:
         return self._price_change_segs
