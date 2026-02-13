@@ -22,12 +22,12 @@ class Report(ABC):
         dataset_processor = self._dataset_cls(self.query)
         return await dataset_processor.create_dataset()
 
-    def _create_visuals(self, procesesed_items: Any) -> None:
-        visuals_processor = self._visuals_cls(procesesed_items)
+    def _create_visuals(self, dataset: Any) -> None:
+        visuals_processor = self._visuals_cls(query=self.query, dataset=dataset)
         self.visuals = visuals_processor.create_visuals()
 
-    def _create_summary(self, procesesed_items: Any) -> None:
-        summary_processor = self._summary_cls(procesesed_items)
+    def _create_summary(self, dataset: Any) -> None:
+        summary_processor = self._summary_cls(query=self.query, dataset=dataset)
         self.summary = summary_processor.create_summary()
 
     async def make_report(self) -> Any:
