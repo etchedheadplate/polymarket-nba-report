@@ -10,8 +10,9 @@ class Summary(ABC):
     _shared_dir = settings.SHARED_DIR
     _output_dir: str
 
-    def __init__(self, input_data: Any) -> None:
-        self._input_data = input_data
+    def __init__(self, query: Any, dataset: Any) -> None:
+        self._query = query
+        self._dataset = dataset
         os.makedirs(self._shared_dir, exist_ok=True)
 
     @abstractmethod
