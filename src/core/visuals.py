@@ -20,8 +20,9 @@ class Visuals(ABC):
     _path_img_bg: Path
     _img_params: dict[str, Any]
 
-    def __init__(self, input_data: Any) -> None:
-        self._input_data = input_data
+    def __init__(self, query: Any, dataset: Any) -> None:
+        self._query = query
+        self._dataset = dataset
         os.makedirs(self._path_shared_dir, exist_ok=True)
 
         try:
@@ -83,8 +84,8 @@ class Plot(Visuals):
         "grid.alpha": 0.6,
     }
 
-    def __init__(self, input_data: Any) -> None:
-        super().__init__(input_data)
+    def __init__(self, query: Any, dataset: Any) -> None:
+        super().__init__(query=query, dataset=dataset)
         self._plot_dir = self._path_shared_dir / self._img_output_dir
         os.makedirs(self._plot_dir, exist_ok=True)
 
@@ -112,7 +113,7 @@ class Chart(Visuals):
         "grid.alpha": 0.6,
     }
 
-    def __init__(self, input_data: Any) -> None:
-        super().__init__(input_data)
+    def __init__(self, query: Any, dataset: Any) -> None:
+        super().__init__(query=query, dataset=dataset)
         self._chart_dir = self._path_shared_dir / self._img_output_dir
         os.makedirs(self._chart_dir, exist_ok=True)
