@@ -5,7 +5,6 @@ from typing import Any
 class DataSet(ABC):
     def __init__(self, query: Any):
         self._query = query
-        self._rows: list[Any] = []
 
     @abstractmethod
     async def _query_database(self) -> list[Any]: ...
