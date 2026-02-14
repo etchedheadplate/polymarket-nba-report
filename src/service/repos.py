@@ -9,36 +9,35 @@ from src.service.schemas import ReportQuery
 
 
 class NBAGamesRepo:
-    async def get_game_series(self, session: AsyncSession, query: ReportQuery) -> list[Any]:
+    def _build_team_conditions(self, query: ReportQuery):
+        team = query.team.name
 
-        def build_team_conditions(query: ReportQuery):
-            team = query.team.name
-
-            if not query.team_vs:
-                if query.team_side == NBATeamSide.GUEST:
-                    return NBAGamesModel.guest_team == team
-                elif query.team_side == NBATeamSide.HOST:
-                    return NBAGamesModel.host_team == team
-                else:
-                    return or_(NBAGamesModel.guest_team == team, NBAGamesModel.host_team == team)
-
+        if not query.team_vs:
+            if query.team_side == NBATeamSide.GUEST:
+                return NBAGamesModel.guest_team == team
+            elif query.team_side == NBATeamSide.HOST:
+                return NBAGamesModel.host_team == team
             else:
-                vs = query.team_vs.name
+                return or_(NBAGamesModel.guest_team == team, NBAGamesModel.host_team == team)
 
-                if query.team_side == NBATeamSide.GUEST:
-                    return and_(NBAGamesModel.guest_team == team, NBAGamesModel.host_team == vs)
-                elif query.team_side == NBATeamSide.HOST:
-                    return and_(NBAGamesModel.guest_team == vs, NBAGamesModel.host_team == team)
-                else:
-                    return or_(
-                        and_(NBAGamesModel.guest_team == team, NBAGamesModel.host_team == vs),
-                        and_(NBAGamesModel.guest_team == vs, NBAGamesModel.host_team == team),
-                    )
+        else:
+            vs = query.team_vs.name
 
+            if query.team_side == NBATeamSide.GUEST:
+                return and_(NBAGamesModel.guest_team == team, NBAGamesModel.host_team == vs)
+            elif query.team_side == NBATeamSide.HOST:
+                return and_(NBAGamesModel.guest_team == vs, NBAGamesModel.host_team == team)
+            else:
+                return or_(
+                    and_(NBAGamesModel.guest_team == team, NBAGamesModel.host_team == vs),
+                    and_(NBAGamesModel.guest_team == vs, NBAGamesModel.host_team == team),
+                )
+
+    async def get_game_series(self, session: AsyncSession, query: ReportQuery) -> list[Any]:
         base_conditions = [
             NBAGamesModel.game_status == query.game_status,
             NBAMarketsModel.market_type == query.market_type,
-            build_team_conditions(query),
+            self._build_team_conditions(query),
         ]
 
         games_ids_stmt = (
