@@ -9,7 +9,7 @@ from src.service.schemas import ReportQuery
 
 
 class NBAGamesRepo:
-    async def get_games_series(self, session: AsyncSession, query: ReportQuery) -> list[Any]:
+    async def get_game_series(self, session: AsyncSession, query: ReportQuery) -> list[Any]:
 
         def build_team_conditions(query: ReportQuery):
             team = query.team.name

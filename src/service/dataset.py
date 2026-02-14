@@ -155,7 +155,7 @@ class QuoteSeriesDataSet(DataSet):
 
     async def _query_database(self) -> list[Any]:
         async with async_session_maker() as session:
-            return await NBAGamesRepo().get_games_series(session, self._query)
+            return await NBAGamesRepo().get_game_series(session, self._query)
 
     async def create_dataset(self) -> dict[int, GameData]:
         self._rows = await self._query_database()
@@ -221,7 +221,7 @@ class PriceWindowDataSet(DataSet):
 
     async def _query_database(self) -> list[Any]:
         async with async_session_maker() as session:
-            return await NBAGamesRepo().get_games_series(session, self._query)
+            return await NBAGamesRepo().get_game_series(session, self._query)
 
     async def create_dataset(self) -> None:
         self._rows = await self._query_database()
