@@ -33,14 +33,13 @@ class NBAGamesRepo:
                     and_(NBAGamesModel.guest_team == vs, NBAGamesModel.host_team == team),
                 )
 
-    async def get_games(self, session: AsyncSession, query: ReportQuery, team_conditions: bool = False) -> list[Any]:
+    async def get_games(self, session: AsyncSession, query: ReportQuery, team_conditions: bool = True) -> list[Any]:
         base_conditions = [
             NBAGamesModel.game_status == query.game_status,
             NBAMarketsModel.market_type == query.market_type,
-            self._build_team_conditions(query),
         ]
 
-        if not team_conditions:
+        if team_conditions:
             base_conditions.append(self._build_team_conditions(query))
 
         games_ids_stmt = (

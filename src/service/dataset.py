@@ -239,7 +239,6 @@ class PriceWindowDataSet(DataSet):
 
     def _process_rows(self, rows: list[Any]) -> dict[int, PriceWindowItem]:
         all_price_windows: dict[int, PriceWindowItem] = {}
-
         for row in rows:
             (
                 game_id,
@@ -255,7 +254,6 @@ class PriceWindowDataSet(DataSet):
                 host_buy,
                 host_sell,
             ) = row
-
             if game_id not in all_price_windows:
                 all_price_windows[game_id] = PriceWindowItem(
                     guest_team=guest_team,
@@ -270,12 +268,11 @@ class PriceWindowDataSet(DataSet):
                     host_price=normalize_prices(host_buy, host_sell),
                 )
             )
-
         return all_price_windows
 
     async def create_dataset(self) -> dict[int, PriceWindowItem]:
         async with async_session_maker() as session:
-            rows = await NBAGamesRepo().get_games(session=session, query=self._query, team_conditions=True)
+            rows = await NBAGamesRepo().get_games(session=session, query=self._query, team_conditions=False)
 
         start, end = self._query.start_price, self._query.end_price
         dataset = self._process_rows(rows=rows)
