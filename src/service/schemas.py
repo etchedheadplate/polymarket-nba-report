@@ -24,7 +24,6 @@ class PriceSnapshot(BaseModel):
 
 
 class WindowSegment(BaseModel):
-    team: str
     start_price: Decimal
     start_ts: int
     end_price: Decimal
@@ -44,7 +43,7 @@ class UnderdogSegment(BaseModel):
     min_ts: int
 
 
-class GameData(BaseModel):
+class QuoteSeriesItem(BaseModel):
     game_id: PositiveInt
     game_date: date
     market_type: str
@@ -61,7 +60,6 @@ class GameData(BaseModel):
 
     _halftime_seg: HalftimeSegment | None = PrivateAttr(default=None)
     _underdog_segs: list[UnderdogSegment] | None = PrivateAttr(default=None)
-    _window_segs: list[WindowSegment] | None = PrivateAttr(default=None)
 
     @computed_field
     @property
@@ -73,7 +71,14 @@ class GameData(BaseModel):
     def underdog_segs(self) -> list[UnderdogSegment] | None:
         return self._underdog_segs
 
+
+class PriceWindowItem(BaseModel):
+    guest_team: str
+    host_team: str
+    price_series: list[PriceSnapshot]
+    _window_segs: list[WindowSegment] | None = PrivateAttr(default=None)
+
     @computed_field
     @property
-    def price_window_segs(self) -> list[WindowSegment] | None:
+    def window_segs(self) -> list[WindowSegment] | None:
         return self._window_segs
