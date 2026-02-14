@@ -15,6 +15,13 @@ from src.service.schemas import (
 )
 
 
+def calculate_standard_deviation(values: list[Decimal]) -> float:
+    if not values:
+        return 0
+    mean = sum(values) / len(values)
+    return math.sqrt(sum((float(v) - float(mean)) ** 2 for v in values) / len(values))
+
+
 def normalize_prices(buy: Decimal | None, sell: Decimal | None) -> Decimal | None:
     if buy is not None and sell is not None:
         return (buy + sell) / 2
@@ -22,47 +29,6 @@ def normalize_prices(buy: Decimal | None, sell: Decimal | None) -> Decimal | Non
 
 
 class QuoteSeriesDataSet(DataSet):
-    def _process_rows(self, rows: list[Any]) -> dict[int, QuoteSeriesItem]:
-        all_quote_series: dict[int, QuoteSeriesItem] = {}
-
-        for row in rows:
-            (
-                game_id,
-                game_date,
-                guest_team,
-                host_team,
-                guest_score,
-                host_score,
-                market_type,
-                timestamp,
-                guest_buy,
-                guest_sell,
-                host_buy,
-                host_sell,
-            ) = row
-
-            if game_id not in all_quote_series:
-                all_quote_series[game_id] = QuoteSeriesItem(
-                    game_id=game_id,
-                    game_date=game_date,
-                    market_type=market_type,
-                    guest_team=guest_team,
-                    host_team=host_team,
-                    guest_score=guest_score,
-                    host_score=host_score,
-                    price_series=[],
-                )
-
-            all_quote_series[game_id].price_series.append(
-                PriceSnapshot(
-                    timestamp=timestamp,
-                    guest_price=normalize_prices(guest_buy, guest_sell),
-                    host_price=normalize_prices(host_buy, host_sell),
-                )
-            )
-
-        return all_quote_series
-
     def _extract_halftime_segment(self, item: QuoteSeriesItem) -> HalftimeSegment | None:
         guest_series = [(p.timestamp, p.guest_price) for p in item.price_series if p.guest_price is not None]
         host_series = [(p.timestamp, p.host_price) for p in item.price_series if p.host_price is not None]
@@ -83,12 +49,6 @@ class QuoteSeriesDataSet(DataSet):
         halftime_duration = 15 * 60
         step_seconds = 60
 
-        def std(values: list[Decimal]) -> float:
-            if not values:
-                return 0
-            mean = sum(values) / len(values)
-            return math.sqrt(sum((float(v) - float(mean)) ** 2 for v in values) / len(values))
-
         best_start, best_score = None, float("inf")
 
         for current_start in range(int(first_ts), int(last_ts - halftime_duration) + 1, step_seconds):
@@ -97,8 +57,8 @@ class QuoteSeriesDataSet(DataSet):
             guest_prices_window = [price for ts, price in guest_series if current_start <= ts <= current_end]
             host_prices_window = [price for ts, price in host_series if current_start <= ts <= current_end]
 
-            vol_guest = std(guest_prices_window)
-            vol_host = std(host_prices_window)
+            vol_guest = calculate_standard_deviation(guest_prices_window)
+            vol_host = calculate_standard_deviation(host_prices_window)
 
             distance_from_center = abs((current_start + current_end) / 2 - center_ts) / (last_ts - first_ts)
             score = vol_guest + vol_host + distance_from_center
@@ -166,6 +126,47 @@ class QuoteSeriesDataSet(DataSet):
 
         return underdog_segments
 
+    def _process_rows(self, rows: list[Any]) -> dict[int, QuoteSeriesItem]:
+        all_quote_series: dict[int, QuoteSeriesItem] = {}
+
+        for row in rows:
+            (
+                game_id,
+                game_date,
+                guest_team,
+                host_team,
+                guest_score,
+                host_score,
+                market_type,
+                timestamp,
+                guest_buy,
+                guest_sell,
+                host_buy,
+                host_sell,
+            ) = row
+
+            if game_id not in all_quote_series:
+                all_quote_series[game_id] = QuoteSeriesItem(
+                    game_id=game_id,
+                    game_date=game_date,
+                    market_type=market_type,
+                    guest_team=guest_team,
+                    host_team=host_team,
+                    guest_score=guest_score,
+                    host_score=host_score,
+                    price_series=[],
+                )
+
+            all_quote_series[game_id].price_series.append(
+                PriceSnapshot(
+                    timestamp=timestamp,
+                    guest_price=normalize_prices(guest_buy, guest_sell),
+                    host_price=normalize_prices(host_buy, host_sell),
+                )
+            )
+
+        return all_quote_series
+
     async def create_dataset(self) -> dict[int, QuoteSeriesItem]:
         async with async_session_maker() as session:
             rows = await NBAGamesRepo().get_games(session=session, query=self._query)
@@ -218,6 +219,7 @@ class PriceWindowDataSet(DataSet):
         window_start: Decimal,
         window_end: Decimal,
     ) -> dict[str, list[WindowSegment]]:
+
         series_guest: list[tuple[int, Decimal]] = []
         series_host: list[tuple[int, Decimal]] = []
 
