@@ -7,7 +7,4 @@ class DataSet(ABC):
         self._query = query
 
     @abstractmethod
-    async def _query_database(self) -> list[Any]: ...
-
-    @abstractmethod
     async def create_dataset(self) -> Any: ...
