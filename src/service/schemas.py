@@ -23,7 +23,7 @@ class PriceSnapshot(BaseModel):
     host_price: Decimal | None
 
 
-class PriceChange(BaseModel):
+class WindowSegment(BaseModel):
     team: str
     start_price: Decimal
     start_ts: int
@@ -61,7 +61,7 @@ class GameData(BaseModel):
 
     _halftime_seg: HalftimeSegment | None = PrivateAttr(default=None)
     _underdog_segs: list[UnderdogSegment] | None = PrivateAttr(default=None)
-    _price_change_segs: list[PriceChange] | None = PrivateAttr(default=None)
+    _window_segs: list[WindowSegment] | None = PrivateAttr(default=None)
 
     @computed_field
     @property
@@ -75,5 +75,5 @@ class GameData(BaseModel):
 
     @computed_field
     @property
-    def price_change_segs(self) -> list[PriceChange] | None:
-        return self._price_change_segs
+    def price_window_segs(self) -> list[WindowSegment] | None:
+        return self._window_segs
