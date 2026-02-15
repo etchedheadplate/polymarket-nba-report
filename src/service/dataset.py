@@ -4,6 +4,7 @@ from typing import Any
 
 from src.core.dataset import DataSet
 from src.database.connection import async_session_maker
+from src.service.domain import NBATeamSide
 from src.service.repos import NBAGamesRepo
 from src.service.schemas import (
     HalftimeSegment,
@@ -218,7 +219,7 @@ class PriceWindowDataSet(DataSet):
         item: PriceWindowItem,
         window_start: Decimal,
         window_end: Decimal,
-    ) -> dict[str, list[WindowSegment]]:
+    ) -> dict[NBATeamSide, list[WindowSegment]]:
 
         series_guest: list[tuple[int, Decimal]] = []
         series_host: list[tuple[int, Decimal]] = []
@@ -233,8 +234,8 @@ class PriceWindowDataSet(DataSet):
         series_host.sort()
 
         return {
-            "guest": self._build_price_window_segments(series_guest, window_start, window_end),
-            "host": self._build_price_window_segments(series_host, window_start, window_end),
+            NBATeamSide.GUEST: self._build_price_window_segments(series_guest, window_start, window_end),
+            NBATeamSide.HOST: self._build_price_window_segments(series_host, window_start, window_end),
         }
 
     def _process_rows(self, rows: list[Any]) -> dict[int, PriceWindowItem]:
