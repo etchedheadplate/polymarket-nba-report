@@ -7,15 +7,15 @@ from src.config import settings
 
 
 class Summary(ABC):
-    _shared_dir = settings.SHARED_DIR
-    _output_dir: str
+    _path_shared_dir: Path = settings.SHARED_DIR
+    _file_output_dir: str
     _report_ext: str = "md"
 
     def __init__(self, query: Any, dataset: Any) -> None:
         self._query = query
         self._dataset = dataset
         self._report_text = ""
-        os.makedirs(self._shared_dir, exist_ok=True)
+        os.makedirs(self._path_shared_dir / self._file_output_dir, exist_ok=True)
 
     @abstractmethod
     def _make_data_summary(self) -> Path: ...
