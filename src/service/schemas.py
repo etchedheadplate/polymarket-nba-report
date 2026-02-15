@@ -76,9 +76,9 @@ class PriceWindowItem(BaseModel):
     guest_team: str
     host_team: str
     price_series: list[PriceSnapshot]
-    _window_segs: list[WindowSegment] | None = PrivateAttr(default=None)
+    _window_segs: dict[NBATeamSide, list[WindowSegment]] | None = PrivateAttr(default=None)
 
     @computed_field
     @property
-    def window_segs(self) -> list[WindowSegment] | None:
+    def window_segs(self) -> dict[NBATeamSide, list[WindowSegment]] | None:
         return self._window_segs
