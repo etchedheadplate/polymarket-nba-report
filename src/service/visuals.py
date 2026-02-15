@@ -1,17 +1,22 @@
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from pathlib import Path
+from typing import Any
 
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.axes import Axes
+from matplotlib.container import BarContainer
+from numpy.typing import NDArray
 
 from src.config import settings
 from src.core.visuals import Chart, Plot
-from src.service.domain import NBATeamColor
-from src.service.schemas import GameData
+from src.service.domain import NBATeamColor, NBATeamSide
+from src.service.schemas import PriceWindowItem, QuoteSeriesItem, ReportQuery
 
 
 class QuoteSeriesPlot(Plot):
-    _visuals_title = "quote_series"
+    _img_output_dir = "quote_series"
     _path_img_bg = settings.BACKGROUND_QUOTE_SERIES_PATH
     _img_params = {
         "image_size": (10, 5),
@@ -48,13 +53,13 @@ class QuoteSeriesPlot(Plot):
         "underdog_time_label_transparency": 1.0,
     }
 
-    def __init__(self, games_data: dict[int, GameData]) -> None:
-        super().__init__(games_data)
+    def __init__(self, query: ReportQuery, dataset: dict[int, QuoteSeriesItem]) -> None:
+        super().__init__(query=query, dataset=dataset)
 
     def _make_transparent_data_image(self) -> list[tuple[Path, Path]]:
         visuals_paths: list[tuple[Path, Path]] = []
 
-        for game_id, game_data in self._input_data.items():
+        for game_id, game_data in self._dataset.items():
             guest_series = [(p.timestamp, p.guest_price) for p in game_data.price_series if p.guest_price is not None]
             host_series = [(p.timestamp, p.host_price) for p in game_data.price_series if p.host_price is not None]
 
@@ -68,11 +73,15 @@ class QuoteSeriesPlot(Plot):
 
             guest_color_scheme = getattr(NBATeamColor, guest_team, None)
             guest_color = (
-                guest_color_scheme["guest"] if guest_color_scheme else self._img_params["team_fallback_color_guest"]
+                guest_color_scheme[NBATeamSide.GUEST]
+                if guest_color_scheme
+                else self._img_params["team_fallback_color_guest"]
             )
             host_color_scheme = getattr(NBATeamColor, host_team, None)
             host_color = (
-                host_color_scheme["host"] if host_color_scheme else self._img_params["team_fallback_color_host"]
+                host_color_scheme[NBATeamSide.HOST]
+                if host_color_scheme
+                else self._img_params["team_fallback_color_host"]
             )
 
             game_date = game_data.game_date.isoformat()
@@ -81,10 +90,9 @@ class QuoteSeriesPlot(Plot):
             halftime_segment = game_data.halftime_seg
             underdog_segments = game_data.underdog_segs
 
-            path_without_bg = self._plot_dir / f"tmp_{self._visuals_title}_{game_id}.{self._img_ext_transp}"
+            path_without_bg = self._plot_dir / f"tmp_{game_id}.{self._img_ext_transp}"
             path_with_bg = (
-                self._plot_dir
-                / f"{game_date}_{self._visuals_title}_{guest_team}_{host_team}_{game_id}_{market_type}.{self._img_ext_final}"
+                self._plot_dir / f"{game_date}_{guest_team}_{host_team}_{game_id}_{market_type}.{self._img_ext_final}"
             )
 
             if path_with_bg.exists():
@@ -129,6 +137,7 @@ class QuoteSeriesPlot(Plot):
                         color=self._img_params["halftime_color"],
                         alpha=self._img_params["halftime_label_transparency"],
                         clip_on=True,
+                        zorder=5,
                     )
 
                 for u_seg in underdog_segments:
@@ -209,68 +218,237 @@ class QuoteSeriesPlot(Plot):
 
 
 class PriceWindowChart(Chart):
-    _visuals_title = "price_window"
+    _img_output_dir = "price_windows"
     _path_img_bg = settings.BACKGROUND_PRICE_WINDOW_PATH
+    _logo_dir = settings.TEAM_LOGO_DIR
     _img_params = {
+        "image_size": (10, 5),
+        "bar_width": 0.40,
+        "bar_transparency": 0.7,
+        "bar_label_color": "#e9ecef",
+        "bar_label_fontweight": "bold",
+        "bar_label_axis_hor_alignment": "center",
+        "bar_label_axis_ver_alignment": "bottom",
+        "bar_label_size_percentage": 17,
+        "bar_label_size_game_count": 13,
+        "axis_y_limit": (0.0, 100.0),
+        "axis_y_label": "% OF GAMES",
+        "axis_y_grid_style": "--",
+        "axis_y_grid_transparency": 0.25,
         "team_fallback_color_guest": "#6c757d",
         "team_fallback_color_host": "#ced4da",
+        "legend_background_color": "#6c757d",
+        "legend_border_color": "#6c757d",
+        "legend_transparency": 0.5,
+        "legend_labels_color": "#e9ecef",
     }
 
-    def __init__(self, games_data: dict[int, GameData]) -> None:
-        super().__init__(games_data)
+    def __init__(self, query: ReportQuery, dataset: dict[int, QuoteSeriesItem]) -> None:
+        super().__init__(query=query, dataset=dataset)
+
+    def _compute_counts(self, games_dict: dict[int, PriceWindowItem]):
+        counts = {NBATeamSide.GUEST: {"games": 0, "windows": 0}, NBATeamSide.HOST: {"games": 0, "windows": 0}}
+        for side in [NBATeamSide.GUEST, NBATeamSide.HOST]:
+            games_with_windows: list[Any] = []
+            all_windows: list[Any] = []
+            for game in games_dict.values():
+                windows = getattr(game, "_window_segs", {}).get(side)
+                if windows:
+                    games_with_windows.append(windows)
+                    all_windows.extend(windows)
+            counts[side]["games"] = len(games_with_windows)
+            counts[side]["windows"] = len(all_windows)
+        return counts
+
+    def _draw_bar_group(
+        self,
+        ax: Axes,
+        positions: NDArray[np.float64] | list[float],
+        values: list[float],
+        totals: list[tuple[int, int]],
+        width: float,
+        color: str,
+        label: str,
+    ) -> BarContainer:
+        min_height = 0.5
+        heights = [v if v > 0 else min_height for v in values]
+
+        bars = ax.bar(  # type: ignore[reportUnknownMemberType]
+            x=positions,
+            height=heights,
+            width=width,
+            label=label,
+            color=color,
+            alpha=self._img_params["bar_transparency"],
+        )
+
+        for bar, val, (matched, total) in zip(bars, values, totals, strict=False):  # type: ignore[reportUnknownMemberType]
+            pos_hor = bar.get_x() + bar.get_width() / 2  # type: ignore[reportUnknownMemberType]
+            pos_ver = bar.get_height() + 1  # type: ignore[reportUnknownMemberType]
+
+            if val == 0:
+                bar.set_alpha(0)  # type: ignore[reportUnknownMemberType]
+                ax.text(  # type: ignore[reportUnknownMemberType]
+                    x=pos_hor,  # type: ignore[reportUnknownMemberType]
+                    y=pos_ver,  # type: ignore[reportUnknownMemberType]
+                    s="NO CASES",
+                    ha=self._img_params["bar_label_axis_hor_alignment"],
+                    va=self._img_params["bar_label_axis_ver_alignment"],
+                    fontsize=self._img_params["bar_label_size_game_count"],
+                    fontweight=self._img_params["bar_label_fontweight"],
+                    color=color,
+                )
+            else:
+                ax.text(  # type: ignore[reportUnknownMemberType]
+                    x=pos_hor,  # type: ignore[reportUnknownMemberType]
+                    y=pos_ver,  # type: ignore[reportUnknownMemberType]
+                    s=f"{val:.1f}%",
+                    ha=self._img_params["bar_label_axis_hor_alignment"],
+                    va=self._img_params["bar_label_axis_ver_alignment"],
+                    fontsize=self._img_params["bar_label_size_percentage"],
+                    fontweight=self._img_params["bar_label_fontweight"],
+                    color=self._img_params["bar_label_color"],
+                )
+
+                ax.text(  # type: ignore[reportUnknownMemberType]
+                    x=pos_hor,  # type: ignore[reportUnknownMemberType]
+                    y=2,
+                    s=f"{matched} / {total}",
+                    ha=self._img_params["bar_label_axis_hor_alignment"],
+                    va=self._img_params["bar_label_axis_ver_alignment"],
+                    fontsize=self._img_params["bar_label_size_game_count"],
+                    fontweight=self._img_params["bar_label_fontweight"],
+                    color=self._img_params["bar_label_color"],
+                )
+
+        return bars
 
     def _make_transparent_data_image(self) -> list[tuple[Path, Path]]:
-        visuals_paths: list[tuple[Path, Path]] = []
+        now = datetime.now().strftime("%Y%m%d_%H%M%S")
+        all_teams = "ALL TEAMS"
+        team = self._query.team.name
+        team_vs = self._query.team_vs.name if self._query.team_vs else all_teams
+        window_start = self._query.start_price
+        window_end = self._query.end_price
 
-        all_price_windows = {}
+        color_scheme = getattr(NBATeamColor, team, None)
+        guest_color = color_scheme[NBATeamSide.GUEST] if color_scheme else self._img_params["team_fallback_color_guest"]
+        host_color = color_scheme[NBATeamSide.HOST] if color_scheme else self._img_params["team_fallback_color_host"]
 
-        for game_id, game_data in self._input_data.items():
-            price_changes = game_data.price_change_segs
-            if not price_changes:
-                continue
+        report_dir = self._chart_dir
+        report_dir.mkdir(parents=True, exist_ok=True)
 
-            guest_team = game_data.guest_team
-            host_team = game_data.host_team
-            guest_score = game_data.guest_score
-            host_score = game_data.host_score
-            game_date = game_data.game_date
+        path_without_bg = report_dir / f"tmp_{now}_{team}_{window_start}-{window_end}.{self._img_ext_transp}"
+        path_with_bg = report_dir / f"{now}_{team}_{window_start}-{window_end}.{self._img_ext_final}"
 
-            team = price_changes[0].team
-            team_vs = guest_team if guest_team != team else host_team
-            team_score = guest_score if guest_team == team else host_score
-            team_vs_score = host_score if host_team != team else guest_score
-            is_guest = team == guest_team
-            has_won = team_score > team_vs_score
+        all_games: dict[int, PriceWindowItem] = self._dataset
+        team_games = {id: g for id, g in all_games.items() if g.guest_team == team or g.host_team == team}
+        team_vs_games = {
+            id: g
+            for id, g in all_games.items()
+            if (g.guest_team == team and g.host_team == team_vs) or (g.host_team == team and g.guest_team == team_vs)
+        }
 
-            windows: list[int] = []
-            for change in price_changes:
-                team = change.team
-                team_vs = guest_team if guest_team != team else host_team
-                windows.append(change.end_ts - change.start_ts)
+        counts_all = self._compute_counts(all_games)
+        counts_team = self._compute_counts(team_games)
+        counts_vs = self._compute_counts(team_vs_games)
 
-            game_stats = {
-                "game_id": game_id,
-                "game_date": game_date,
-                "is_guest": is_guest,
-                "team_vs": team_vs,
-                "windows": windows,
-                "has_won": has_won,
-            }
+        categories = [
+            (counts_all[NBATeamSide.GUEST]["games"], len(all_games)),
+            (counts_all[NBATeamSide.HOST]["games"], len(all_games)),
+            (counts_team[NBATeamSide.GUEST]["games"], len(team_games)),
+            (counts_team[NBATeamSide.HOST]["games"], len(team_games)),
+            (counts_vs[NBATeamSide.GUEST]["games"], len(team_vs_games)),
+            (counts_vs[NBATeamSide.HOST]["games"], len(team_vs_games)),
+        ]
 
-            all_price_windows.setdefault(team_vs, {})[game_id] = game_stats
+        totals_data = [
+            (counts_all[NBATeamSide.GUEST]["games"], len(all_games)),
+            (counts_all[NBATeamSide.HOST]["games"], len(all_games)),
+            (counts_team[NBATeamSide.GUEST]["games"], len(team_games)),
+            (counts_team[NBATeamSide.HOST]["games"], len(team_games)),
+            (counts_vs[NBATeamSide.GUEST]["games"], len(team_vs_games)),
+            (counts_vs[NBATeamSide.HOST]["games"], len(team_vs_games)),
+        ]
 
-            guest_color_scheme = getattr(NBATeamColor, guest_team, None)
-            guest_color = (
-                guest_color_scheme["guest"] if guest_color_scheme else self._img_params["team_fallback_color_guest"]
+        values = [games / max(1, total) * 100 for games, total in categories]
+        values = [
+            values[0],
+            values[1],  # ALL
+            values[2],
+            values[3],  # TEAM
+            values[4],
+            values[5],  # VS TEAM
+        ]
+
+        with plt.rc_context(self._plot_style):  # type: ignore[reportUnknownMemberType]
+            fig, ax = plt.subplots(figsize=self._img_params["image_size"], facecolor="none")  # type: ignore[reportUnknownMemberType]
+
+            guest_vals = [values[0], values[2], values[4]] if team_vs != all_teams else [values[0], values[2]]
+            host_vals = [values[1], values[3], values[5]] if team_vs != all_teams else [values[1], values[3]]
+            guest_totals = (
+                [totals_data[0], totals_data[2], totals_data[4]]
+                if team_vs != all_teams
+                else [totals_data[0], totals_data[2]]
             )
-            host_color_scheme = getattr(NBATeamColor, host_team, None)
-            host_color = (
-                host_color_scheme["host"] if host_color_scheme else self._img_params["team_fallback_color_host"]
+            host_totals = (
+                [totals_data[1], totals_data[3], totals_data[5]]
+                if team_vs != all_teams
+                else [totals_data[1], totals_data[3]]
+            )
+            tick_labels = (
+                [all_teams, f"{team} vs {all_teams}", f"{team} vs {team_vs}"]
+                if team_vs != all_teams
+                else [all_teams, f"{team} vs {all_teams}"]
+            )
+            bar_spacing = np.arange(3 if team_vs != all_teams else 2)
+
+            self._draw_bar_group(
+                ax=ax,
+                positions=bar_spacing - self._img_params["bar_width"] / 2,
+                values=guest_vals,
+                totals=guest_totals,
+                width=self._img_params["bar_width"],
+                color=guest_color,
+                label=NBATeamSide.GUEST.upper(),
             )
 
-            print(guest_color, host_color)
+            self._draw_bar_group(
+                ax=ax,
+                positions=bar_spacing + self._img_params["bar_width"] / 2,
+                values=host_vals,
+                totals=host_totals,
+                width=self._img_params["bar_width"],
+                color=host_color,
+                label=NBATeamSide.HOST.upper(),
+            )
 
-        for team, data in all_price_windows.items():
-            print(team, len(data))
+            ax.set_xticks(bar_spacing)  # type: ignore[reportUnknownMemberType]
+            ax.set_xticklabels(tick_labels)  # type: ignore[reportUnknownMemberType]
 
-        return visuals_paths
+            max_val = max(guest_vals + host_vals)
+            upper_limit = max_val * 1.15 if max_val > 0 else 10
+            ax.set_ylim(0, upper_limit)
+
+            ax.set_ylabel(self._img_params["axis_y_label"])  # type: ignore[reportUnknownMemberType]
+            plt.title(f"{date.today()} • {window_start}-{window_end} Window Stats • {team} vs {team_vs}")  # type: ignore[reportUnknownMemberType]
+
+            ax.grid(axis="x", visible=False)  # type: ignore[reportUnknownMemberType]
+            ax.grid(  # type: ignore[reportUnknownMemberType]
+                axis="y",
+                linestyle=self._img_params["axis_y_grid_style"],
+                alpha=self._img_params["axis_y_grid_transparency"],
+            )
+
+            plt.legend(  # type: ignore[reportUnknownMemberType]
+                facecolor=self._img_params["legend_background_color"],
+                edgecolor=self._img_params["legend_border_color"],
+                framealpha=self._img_params["legend_transparency"],
+                labelcolor=self._img_params["legend_labels_color"],
+            )
+
+            plt.tight_layout()
+            plt.savefig(path_without_bg, transparent=True)  # type: ignore[reportUnknownMemberType]
+            plt.close(fig)
+
+        return [(path_without_bg, path_with_bg)]
