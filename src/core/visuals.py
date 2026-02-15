@@ -23,7 +23,7 @@ class Visuals(ABC):
     def __init__(self, query: Any, dataset: Any) -> None:
         self._query = query
         self._dataset = dataset
-        os.makedirs(self._path_shared_dir, exist_ok=True)
+        os.makedirs(self._path_shared_dir / self._img_output_dir, exist_ok=True)
 
         try:
             fm.fontManager.addfont(self._path_img_font)  # type: ignore[attr-defined]
@@ -62,7 +62,6 @@ class Visuals(ABC):
 
 
 class Plot(Visuals):
-    _img_output_dir = "plots"
     _plot_style = {
         "font.family": "Montserrat",
         "text.color": "#e9ecef",
@@ -91,7 +90,6 @@ class Plot(Visuals):
 
 
 class Chart(Visuals):
-    _img_output_dir = "charts"
     _plot_style = {
         "font.family": "Montserrat",
         "text.color": "#e9ecef",
