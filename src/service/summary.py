@@ -7,7 +7,7 @@ from src.service.schemas import PriceWindowItem, QuoteSeriesItem, ReportQuery, W
 
 
 class QuoteSeriesSummary(Summary):
-    _output_dir = "quote_series"
+    _file_output_dir = "quote_series"
 
     def __init__(self, query: ReportQuery, dataset: dict[int, QuoteSeriesItem]) -> None:
         super().__init__(query=query, dataset=dataset)
@@ -17,7 +17,7 @@ class QuoteSeriesSummary(Summary):
 
 
 class PriceWindowSummary(Summary):
-    _output_dir = "price_windows"
+    _file_output_dir = "price_windows"
 
     def __init__(self, query: ReportQuery, dataset: dict[int, PriceWindowItem]) -> None:
         super().__init__(query=query, dataset=dataset)
@@ -87,8 +87,7 @@ class PriceWindowSummary(Summary):
         window_end = self._query.end_price
 
         now = datetime.now().strftime("%Y%m%d_%H%M%S")
-        report_dir = self._shared_dir / self._output_dir
-        report_dir.mkdir(parents=True, exist_ok=True)
+        report_dir = self._path_shared_dir / self._file_output_dir
         report_path = report_dir / f"{now}_{team}_{window_start}-{window_end}.{self._report_ext}"
 
         all_games: dict[int, PriceWindowItem] = self._dataset
