@@ -33,13 +33,7 @@ class NBAGamesRepo:
                     and_(NBAGamesModel.guest_team == vs, NBAGamesModel.host_team == team),
                 )
 
-    async def get_games(
-        self,
-        session: AsyncSession,
-        query: ReportQuery,
-        team_conditions: bool = True,
-    ) -> list[Any]:
-
+    async def get_games(self, session: AsyncSession, query: ReportQuery, team_conditions: bool = True) -> list[Any]:
         base_conditions = [
             NBAGamesModel.game_status == query.game_status,
         ]
