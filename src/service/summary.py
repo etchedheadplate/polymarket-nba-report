@@ -13,7 +13,15 @@ class QuoteSeriesSummary(Summary):
         super().__init__(query=query, dataset=dataset)
 
     def _make_data_summary(self) -> Path:
-        return Path()
+        report_dir = self._path_shared_dir / self._file_output_dir
+        report_path = report_dir / f"dummy.{self._report_ext}"
+
+        report_blocks = [
+            f"future {self._file_output_dir} report",
+        ]
+
+        self._report_text = "\n".join(report_blocks)
+        return report_path
 
 
 class PriceWindowSummary(Summary):
