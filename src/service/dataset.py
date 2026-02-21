@@ -158,11 +158,19 @@ class QuoteSeriesDataSet(DataSet):
                     price_series=[],
                 )
 
+            guest_price = normalize_prices(guest_buy, guest_sell)
+            host_price = normalize_prices(host_buy, host_sell)
+
+            if host_price and not guest_price:
+                guest_price = Decimal("1.0") - host_price
+            if guest_price and not host_price:
+                host_price = Decimal("1.0") - guest_price
+
             all_quote_series[game_id].price_series.append(
                 PriceSnapshot(
                     timestamp=timestamp,
-                    guest_price=normalize_prices(guest_buy, guest_sell),
-                    host_price=normalize_prices(host_buy, host_sell),
+                    guest_price=guest_price,
+                    host_price=host_price,
                 )
             )
 
@@ -262,11 +270,19 @@ class PriceWindowDataSet(DataSet):
                     price_series=[],
                 )
 
+            guest_price = normalize_prices(guest_buy, guest_sell)
+            host_price = normalize_prices(host_buy, host_sell)
+
+            if host_price and not guest_price:
+                guest_price = Decimal("1.0") - host_price
+            if guest_price and not host_price:
+                host_price = Decimal("1.0") - guest_price
+
             all_price_windows[game_id].price_series.append(
                 PriceSnapshot(
                     timestamp=timestamp,
-                    guest_price=normalize_prices(guest_buy, guest_sell),
-                    host_price=normalize_prices(host_buy, host_sell),
+                    guest_price=guest_price,
+                    host_price=host_price,
                 )
             )
         return all_price_windows
