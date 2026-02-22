@@ -1,8 +1,16 @@
 from src.core.reports import Report
-from src.service.dataset import PriceWindowDataSet, QuoteSeriesDataSet
-from src.service.schemas import PriceWindowQuery, QuoteSeriesQuery
-from src.service.summary import PriceWindowSummary, QuoteSeriesSummary
-from src.service.visuals import PriceWindowChart, QuoteSeriesPlot
+from src.service.price_windows import (
+    PriceWindowChart,
+    PriceWindowDataSet,
+    PriceWindowQuery,
+    PriceWindowSummary,
+)
+from src.service.quote_series import (
+    QuoteSeriesDataSet,
+    QuoteSeriesPlot,
+    QuoteSeriesQuery,
+    QuoteSeriesSummary,
+)
 
 
 class QuoteSeriesReport(Report):
