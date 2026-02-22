@@ -4,6 +4,7 @@ from pathlib import Path
 from src.core.summary import Summary
 from src.service.domain import NBATeamSide
 from src.service.price_windows.schemas import PriceWindowItem, PriceWindowQuery, WindowSegment
+from src.service.utils import is_matching_game
 
 
 class PriceWindowSummary(Summary):
@@ -11,15 +12,6 @@ class PriceWindowSummary(Summary):
 
     def __init__(self, query: PriceWindowQuery, dataset: dict[int, PriceWindowItem]) -> None:
         super().__init__(query=query, dataset=dataset)
-
-    def _is_matching_game(self, game: PriceWindowItem, team: str, team_vs: str | None = None) -> bool:
-        guest = game.guest_team
-        host = game.host_team
-        if team not in (guest, host):
-            return False
-        if team_vs:
-            return (guest == team and host == team_vs) or (guest == team_vs and host == team)
-        return True
 
     def _collect_windows(self, games_dict: dict[int, PriceWindowItem], side: NBATeamSide):
         games_with_windows: list[list[WindowSegment]] = []
@@ -81,8 +73,8 @@ class PriceWindowSummary(Summary):
         report_path = report_dir / f"{now}_{team}_{window_start}-{window_end}.{self._report_ext}"
 
         all_games: dict[int, PriceWindowItem] = self._dataset
-        team_games = {id: game for id, game in all_games.items() if self._is_matching_game(game, team)}
-        team_vs_games = {id: game for id, game in all_games.items() if self._is_matching_game(game, team, team_vs)}
+        team_games = {id: game for id, game in all_games.items() if is_matching_game(game, team)}
+        team_vs_games = {id: game for id, game in all_games.items() if is_matching_game(game, team, team_vs)}
 
         report_blocks = [
             f"Window: {window_start} -> {window_end}",
