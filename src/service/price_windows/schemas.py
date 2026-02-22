@@ -3,7 +3,7 @@ from decimal import Decimal
 from pydantic import BaseModel, PrivateAttr, computed_field
 
 from src.service.domain import NBATeamSide
-from src.service.schemas import PriceSnapshot, ReportQuery
+from src.service.schemas import ReportItem, ReportQuery
 
 
 class PriceWindowQuery(ReportQuery):
@@ -19,10 +19,7 @@ class WindowSegment(BaseModel):
     end_ts: int
 
 
-class PriceWindowItem(BaseModel):
-    guest_team: str
-    host_team: str
-    price_series: list[PriceSnapshot]
+class PriceWindowItem(ReportItem):
     _window_segs: dict[NBATeamSide, list[WindowSegment]] | None = PrivateAttr(default=None)
 
     @computed_field

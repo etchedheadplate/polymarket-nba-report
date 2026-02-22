@@ -18,3 +18,9 @@ class PriceSnapshot(BaseModel):
     timestamp: int
     guest_price: Decimal | None
     host_price: Decimal | None
+
+
+class ReportItem(BaseModel):
+    guest_team: str
+    host_team: str
+    price_series: list[PriceSnapshot]
