@@ -7,7 +7,6 @@ from src.service.schemas import ReportItem, ReportQuery
 
 
 class PriceWindowQuery(ReportQuery):
-    price: Decimal | None = None
     window_start: Decimal | None = None
     window_end: Decimal | None = None
 
