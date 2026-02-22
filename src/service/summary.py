@@ -91,8 +91,8 @@ class PriceWindowSummary(Summary):
     def _make_data_summary(self) -> Path:
         team = self._query.team.name
         team_vs = self._query.team_vs.name if self._query.team_vs else None
-        window_start = self._query.start_price
-        window_end = self._query.end_price
+        window_start = self._query.window_start
+        window_end = self._query.window_end
 
         now = datetime.now().strftime("%Y%m%d_%H%M%S")
         report_dir = self._path_shared_dir / self._file_output_dir

@@ -291,7 +291,7 @@ class PriceWindowDataSet(DataSet):
         async with async_session_maker() as session:
             rows = await NBAGamesRepo().get_games(session=session, query=self._query, team_conditions=False)
 
-        start, end = self._query.start_price, self._query.end_price
+        start, end = self._query.window_start, self._query.window_end
         dataset = self._process_rows(rows=rows)
         for game in dataset.values():
             game._window_segs = self._extract_price_window_segments(item=game, window_start=start, window_end=end)  # type: ignore

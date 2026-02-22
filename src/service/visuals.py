@@ -328,8 +328,8 @@ class PriceWindowChart(Chart):
         all_teams = "ALL TEAMS"
         team = self._query.team.name
         team_vs = self._query.team_vs.name if self._query.team_vs else all_teams
-        window_start = self._query.start_price
-        window_end = self._query.end_price
+        window_start = self._query.window_start
+        window_end = self._query.window_end
 
         color_scheme = getattr(NBATeamColor, team, None)
         guest_color = color_scheme[NBATeamSide.GUEST] if color_scheme else self._img_params["team_fallback_color_guest"]

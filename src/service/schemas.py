@@ -13,8 +13,9 @@ class ReportQuery(BaseModel):
     team: NBATeam
     team_vs: NBATeam | None = None
     team_side: NBATeamSide | None = None
-    start_price: Decimal | None = None
-    end_price: Decimal | None = None
+    price: Decimal | None = None
+    window_start: Decimal | None = None
+    window_end: Decimal | None = None
 
 
 class PriceSnapshot(BaseModel):
