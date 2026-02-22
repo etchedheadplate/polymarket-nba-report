@@ -13,6 +13,12 @@ class ReportQuery(BaseModel):
     team: NBATeam
     team_vs: NBATeam | None = None
     team_side: NBATeamSide | None = None
+
+
+class QuoteSeriesQuery(ReportQuery): ...
+
+
+class PriceWindowQuery(ReportQuery):
     price: Decimal | None = None
     window_start: Decimal | None = None
     window_end: Decimal | None = None

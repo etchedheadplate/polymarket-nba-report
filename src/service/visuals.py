@@ -12,7 +12,7 @@ from numpy.typing import NDArray
 from src.config import settings
 from src.core.visuals import Chart, Plot
 from src.service.domain import NBATeamColor, NBATeamSide
-from src.service.schemas import PriceWindowItem, QuoteSeriesItem, ReportQuery
+from src.service.schemas import PriceWindowItem, PriceWindowQuery, QuoteSeriesItem, QuoteSeriesQuery
 
 
 class QuoteSeriesPlot(Plot):
@@ -53,7 +53,7 @@ class QuoteSeriesPlot(Plot):
         "underdog_time_label_transparency": 1.0,
     }
 
-    def __init__(self, query: ReportQuery, dataset: dict[int, QuoteSeriesItem]) -> None:
+    def __init__(self, query: QuoteSeriesQuery, dataset: dict[int, QuoteSeriesItem]) -> None:
         super().__init__(query=query, dataset=dataset)
 
     def _make_transparent_data_image(self) -> list[tuple[Path, Path]]:
@@ -243,7 +243,7 @@ class PriceWindowChart(Chart):
         "legend_labels_color": "#e9ecef",
     }
 
-    def __init__(self, query: ReportQuery, dataset: dict[int, QuoteSeriesItem]) -> None:
+    def __init__(self, query: PriceWindowQuery, dataset: dict[int, QuoteSeriesItem]) -> None:
         super().__init__(query=query, dataset=dataset)
 
     def _compute_counts(self, games_dict: dict[int, PriceWindowItem]):

@@ -3,13 +3,13 @@ from pathlib import Path
 
 from src.core.summary import Summary
 from src.service.domain import NBATeamSide
-from src.service.schemas import PriceWindowItem, QuoteSeriesItem, ReportQuery, WindowSegment
+from src.service.schemas import PriceWindowItem, PriceWindowQuery, QuoteSeriesItem, QuoteSeriesQuery, WindowSegment
 
 
 class QuoteSeriesSummary(Summary):
     _file_output_dir = "quote_series"
 
-    def __init__(self, query: ReportQuery, dataset: dict[int, QuoteSeriesItem]) -> None:
+    def __init__(self, query: QuoteSeriesQuery, dataset: dict[int, QuoteSeriesItem]) -> None:
         super().__init__(query=query, dataset=dataset)
 
     def _make_data_summary(self) -> Path:
@@ -27,7 +27,7 @@ class QuoteSeriesSummary(Summary):
 class PriceWindowSummary(Summary):
     _file_output_dir = "price_windows"
 
-    def __init__(self, query: ReportQuery, dataset: dict[int, PriceWindowItem]) -> None:
+    def __init__(self, query: PriceWindowQuery, dataset: dict[int, PriceWindowItem]) -> None:
         super().__init__(query=query, dataset=dataset)
 
     def _is_matching_game(self, game: PriceWindowItem, team: str, team_vs: str | None = None) -> bool:
