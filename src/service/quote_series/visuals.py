@@ -51,8 +51,8 @@ class QuoteSeriesPlot(Plot):
     def __init__(self, query: QuoteSeriesQuery, dataset: dict[int, QuoteSeriesItem]) -> None:
         super().__init__(query=query, dataset=dataset)
 
-    def _make_transparent_data_image(self) -> list[tuple[Path, Path]]:
-        visuals_paths: list[tuple[Path, Path]] = []
+    def _make_transparent_data_image(self) -> list[tuple[Path | None, Path]]:
+        visuals_paths: list[tuple[Path | None, Path]] = []
 
         for game_id, game_data in self._dataset.items():
             guest_series = [(p.timestamp, p.guest_price) for p in game_data.price_series if p.guest_price is not None]
@@ -91,6 +91,7 @@ class QuoteSeriesPlot(Plot):
             )
 
             if path_with_bg.exists():
+                visuals_paths.append((None, path_with_bg))
                 continue
 
             if not underdog_segments:

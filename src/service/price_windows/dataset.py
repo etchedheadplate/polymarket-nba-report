@@ -2,7 +2,7 @@ from decimal import Decimal
 from typing import Any
 
 from src.core.dataset import DataSet
-from src.database.connection import async_session_maker
+from src.database.connection import sync_session_maker
 from src.service.domain import NBATeamSide
 from src.service.price_windows.schemas import PriceWindowItem, WindowSegment
 from src.service.repos import NBAGamesRepo
@@ -109,9 +109,9 @@ class PriceWindowDataSet(DataSet):
             )
         return all_price_windows
 
-    async def create_dataset(self) -> dict[int, PriceWindowItem]:
-        async with async_session_maker() as session:
-            rows = await NBAGamesRepo().get_games(session=session, query=self._query, team_conditions=False)
+    def create_dataset(self) -> dict[int, PriceWindowItem]:
+        with sync_session_maker() as session:
+            rows = NBAGamesRepo().get_games(session=session, query=self._query, team_conditions=False)
 
         start, end = self._query.window_start, self._query.window_end
         dataset = self._process_rows(rows=rows)

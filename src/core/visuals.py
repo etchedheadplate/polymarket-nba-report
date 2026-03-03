@@ -28,30 +28,32 @@ class Visuals(ABC):
         try:
             fm.fontManager.addfont(self._path_img_font)  # type: ignore[attr-defined]
         except Exception:
-            logger.error("Failed to set custom font")
+            logger.error("visuals %s: failed to set custom font", self.__class__.__name__)
 
     @abstractmethod
-    def _make_transparent_data_image(self) -> list[tuple[Path, Path]]: ...
+    def _make_transparent_data_image(self) -> list[tuple[Path | None, Path]]: ...
 
-    def _overlay_background(self, visuals_paths: list[tuple[Path, Path]]) -> list[Path]:
+    def _overlay_background(self, visuals_paths: list[tuple[Path | None, Path]]) -> list[Path]:
         image_paths: list[Path] = []
 
         for paths in visuals_paths:
             path_without_bg, path_with_bg = paths
 
-            background = Image.open(self._path_img_bg).convert("RGBA")
-            image_without_bg = Image.open(path_without_bg).convert("RGBA")
+            if path_without_bg:
+                background = Image.open(self._path_img_bg).convert("RGBA")
+                image_without_bg = Image.open(path_without_bg).convert("RGBA")
 
-            bg_w, bg_h = background.size
-            image_without_bg = image_without_bg.resize((bg_w, bg_h))
+                bg_w, bg_h = background.size
+                image_without_bg = image_without_bg.resize((bg_w, bg_h))
 
-            image_with_bg = Image.alpha_composite(background, image_without_bg)
-            image_with_bg = image_with_bg.convert("RGB")
-            image_with_bg.save(path_with_bg)
-            logger.debug("Created: %s", path_with_bg)
+                image_with_bg = Image.alpha_composite(background, image_without_bg)
+                image_with_bg = image_with_bg.convert("RGB")
+                image_with_bg.save(path_with_bg)
+                path_without_bg.unlink(missing_ok=True)
+
+                logger.debug("visuals %s: created %s", self.__class__.__name__, path_with_bg)
 
             image_paths.append(path_with_bg)
-            path_without_bg.unlink(missing_ok=True)
 
         return image_paths
 

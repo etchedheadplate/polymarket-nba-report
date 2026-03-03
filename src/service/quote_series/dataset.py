@@ -2,7 +2,7 @@ from decimal import Decimal
 from typing import Any
 
 from src.core.dataset import DataSet
-from src.database.connection import async_session_maker
+from src.database.connection import sync_session_maker
 from src.service.quote_series.schemas import HalftimeSegment, QuoteSeriesItem, UnderdogSegment
 from src.service.repos import NBAGamesRepo
 from src.service.schemas import PriceSnapshot
@@ -156,9 +156,9 @@ class QuoteSeriesDataSet(DataSet):
 
         return all_quote_series
 
-    async def create_dataset(self) -> dict[int, QuoteSeriesItem]:
-        async with async_session_maker() as session:
-            rows = await NBAGamesRepo().get_games(session=session, query=self._query)
+    def create_dataset(self) -> dict[int, QuoteSeriesItem]:
+        with sync_session_maker() as session:
+            rows = NBAGamesRepo().get_games(session=session, query=self._query)
 
         dataset = self._process_rows(rows)
         for game in dataset.values():

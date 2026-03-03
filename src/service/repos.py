@@ -1,7 +1,7 @@
 from typing import Any
 
 from sqlalchemy import and_, or_, select
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Session
 
 from src.database.models import NBAGamesModel, NBAMarketsModel, NBAPricesModel
 from src.service.domain import NBATeamSide
@@ -33,7 +33,7 @@ class NBAGamesRepo:
                     and_(NBAGamesModel.guest_team == vs, NBAGamesModel.host_team == team),
                 )
 
-    async def get_games(self, session: AsyncSession, query: ReportQuery, team_conditions: bool = True) -> list[Any]:
+    def get_games(self, session: Session, query: ReportQuery, team_conditions: bool = True) -> list[Any]:
         base_conditions = [
             NBAGamesModel.game_status == query.game_status,
         ]
@@ -103,5 +103,5 @@ class NBAGamesRepo:
                 )
             )
 
-        result = await session.execute(stmt)
+        result = session.execute(stmt)
         return list(result.all())

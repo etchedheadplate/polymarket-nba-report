@@ -18,9 +18,9 @@ class Report(ABC):
         self.visuals: list[Path] = []
         self.summary: Path = Path()
 
-    async def _create_dataset(self) -> Any:
+    def _create_dataset(self) -> Any:
         dataset_processor = self._dataset_cls(self.query)
-        return await dataset_processor.create_dataset()
+        return dataset_processor.create_dataset()
 
     def _create_visuals(self, dataset: Any) -> None:
         visuals_processor = self._visuals_cls(query=self.query, dataset=dataset)
@@ -30,8 +30,8 @@ class Report(ABC):
         summary_processor = self._summary_cls(query=self.query, dataset=dataset)
         self.summary = summary_processor.create_summary()
 
-    async def make_report(self) -> Any:
-        dataset = await self._create_dataset()
-        logger.debug("Processed %s items", len(dataset))
+    def make_report(self) -> Any:
+        dataset = self._create_dataset()
+        logger.debug("report %s: processed %s items", self.__class__.__name__, len(dataset))
         self._create_visuals(dataset)
         self._create_summary(dataset)

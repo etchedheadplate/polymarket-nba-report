@@ -120,7 +120,7 @@ class PriceWindowChart(Chart):
 
         return bars
 
-    def _make_transparent_data_image(self) -> list[tuple[Path, Path]]:
+    def _make_transparent_data_image(self) -> list[tuple[Path | None, Path]]:
         now = datetime.now().strftime("%Y%m%d_%H%M%S")
         all_teams = "ALL TEAMS"
         team = self._query.team.name
