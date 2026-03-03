@@ -17,6 +17,19 @@ class Settings(BaseSettings):
     BACKGROUND_QUOTE_SERIES_PATH: Path
     BACKGROUND_PRICE_WINDOW_PATH: Path
 
+    RABBITMQ_HOST: str
+    RABBITMQ_PORT: int
+    RABBITMQ_USER: str
+    RABBITMQ_PASSWORD: str
+    RABBITMQ_VHOST: str
+
+    EXCHANGE_NAME: str
+    QUEUE_TGBOT: str
+    QUEUE_ORACLE: str
+    QUEUE_REPORT: str
+    RK_REQUEST: str
+    RK_RESPONSE: str
+
     model_config = SettingsConfigDict(env_file=".env")
 
 
