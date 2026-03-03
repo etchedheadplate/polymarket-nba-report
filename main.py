@@ -1,25 +1,51 @@
 import asyncio
+import contextlib
+import signal
+from typing import Any
 
-from src.service.domain import NBATeam
-from src.service.reports import QuoteSeriesReport
-from src.service.schemas import GameSeriesQuery
-
-
-async def generate_all_combinations():
-    for guest in NBATeam:
-        query = GameSeriesQuery(team=guest)
-
-        for host in NBATeam:
-            query.team_vs = host
-
-            report = QuoteSeriesReport(query)
-            await report.make_report()
+from src.config import settings
+from src.queue import RabbitMQConnection, RabbitMQConsumer, RabbitMQProducer
+from src.workers import Handler, Request
 
 
 async def main():
-    query = GameSeriesQuery(team=NBATeam.NYK, team_vs=NBATeam.BOS)
-    report = QuoteSeriesReport(query)
-    await report.make_report()
+    connection = RabbitMQConnection()
+    consumer = RabbitMQConsumer(connection)
+    producer = RabbitMQProducer(connection)
+
+    stop_event = asyncio.Event()
+
+    async def handle_message(msg: dict[str, Any]) -> None:
+        message = Request(**msg)
+        response = Handler().process(message)
+        print(response)
+        await producer.send_message(
+            exchange_name=settings.EXCHANGE_NAME,
+            routing_key=f"{settings.QUEUE_TGBOT}.{settings.RK_RESPONSE}",
+            message=response.model_dump(),
+        )
+
+    async def start_consumer():
+        with contextlib.suppress(asyncio.CancelledError):
+            await consumer.consume(
+                exchange_name=settings.EXCHANGE_NAME,
+                routing_key=f"{settings.QUEUE_REPORT}.{settings.RK_REQUEST}",
+                callback=handle_message,
+            )
+
+    loop = asyncio.get_running_loop()
+    for sig in (signal.SIGINT, signal.SIGTERM):
+        loop.add_signal_handler(sig, stop_event.set)
+
+    tasks = [asyncio.create_task(start_consumer())]
+
+    await stop_event.wait()
+
+    for task in tasks:
+        task.cancel()
+
+    await asyncio.gather(*tasks, return_exceptions=True)
+    await connection.close()
 
 
 if __name__ == "__main__":
