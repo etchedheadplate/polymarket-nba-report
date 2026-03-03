@@ -1,3 +1,5 @@
+from typing import TypedDict
+
 from src.core.reports import Report
 from src.service.price_windows import (
     PriceWindowChart,
@@ -11,6 +13,7 @@ from src.service.quote_series import (
     QuoteSeriesQuery,
     QuoteSeriesSummary,
 )
+from src.service.schemas import ReportQuery
 
 
 class QuoteSeriesReport(Report):
@@ -29,3 +32,21 @@ class PriceWindowReport(Report):
 
     def __init__(self, query: PriceWindowQuery) -> None:
         super().__init__(query)
+
+
+class ReportMapping(TypedDict):
+    report: type[Report]
+    query: type[ReportQuery]
+
+
+_report_map: dict[str, ReportMapping] = {
+    "price_windows": {"report": PriceWindowReport, "query": PriceWindowQuery},
+    "quote_series": {"report": QuoteSeriesReport, "query": QuoteSeriesQuery},
+}
+
+
+def select_report(name: str) -> tuple[type[Report], type[ReportQuery]]:
+    mapping = _report_map.get(name)
+    if mapping is None:
+        raise ValueError(f"Unknown report: {name}")
+    return mapping["report"], mapping["query"]
