@@ -18,7 +18,6 @@ async def main():
     async def handle_message(msg: dict[str, Any]) -> None:
         message = Request(**msg)
         response = Handler().process(message)
-        print(response)
         await producer.send_message(
             exchange_name=settings.EXCHANGE_NAME,
             routing_key=f"{settings.QUEUE_TGBOT}.{settings.RK_RESPONSE}",
