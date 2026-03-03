@@ -36,7 +36,7 @@ class QuoteSeriesPlot(Plot):
         "underdog_fill_transparency": 0.125,
         "underdog_fill_border_transparency": 0.25,
         "underdog_fill_border_style": "--",
-        "underdog_dot_border_color": "#e9ecef",  # цвет обводки
+        "underdog_dot_border_color": "#e9ecef",
         "underdog_dot_sborder_width": 1,
         "underdog_dot_size": 75,
         "underdog_dot_label_offset": (0, -15),
@@ -100,31 +100,49 @@ class QuoteSeriesPlot(Plot):
             match_start_ts = underdog_segments[0].start_ts
             match_end_ts = underdog_segments[-1].end_ts
 
-            with plt.rc_context(rc=self._plot_style):  # type: ignore[reportUnknownMemberType]
-                plt.figure(figsize=self._img_params["image_size"])  # type: ignore[reportUnknownMemberType]
+            with plt.rc_context(rc=self._plot_style):  # pyright: ignore[reportUnknownMemberType]
+                plt.figure(figsize=self._img_params["image_size"])  # pyright: ignore[reportUnknownMemberType]
 
                 if guest_series:
                     x, y = zip(*guest_series, strict=False)
                     x_rel = [datetime(1900, 1, 1) + timedelta(seconds=ts - match_start_ts) for ts in x]
-                    plt.plot(x_rel, y, label=guest_team, color=guest_color, linewidth=self._img_params["team_probability_line_width"])  # type: ignore[reportUnknownMemberType]
+                    plt.plot(  # pyright: ignore[reportUnknownMemberType]
+                        x_rel,  # pyright: ignore[reportArgumentType]
+                        y,
+                        label=guest_team,
+                        color=guest_color,
+                        linewidth=self._img_params["team_probability_line_width"],
+                    )
 
                 if host_series:
                     x, y = zip(*host_series, strict=False)
                     x_rel = [datetime(1900, 1, 1) + timedelta(seconds=ts - match_start_ts) for ts in x]
-                    plt.plot(x_rel, y, label=host_team, color=host_color, linewidth=self._img_params["team_probability_line_width"])  # type: ignore[reportUnknownMemberType]
+                    plt.plot(  # pyright: ignore[reportUnknownMemberType]
+                        x_rel,  # pyright: ignore[reportArgumentType]
+                        y,
+                        label=host_team,
+                        color=host_color,
+                        linewidth=self._img_params["team_probability_line_width"],
+                    )
 
                 if halftime_segment:
-                    plt.axvspan(  # type: ignore[reportUnknownMemberType]
-                        datetime(1900, 1, 1) + timedelta(seconds=halftime_segment.start_ts - match_start_ts),  # type: ignore[arg-type]
-                        datetime(1900, 1, 1) + timedelta(seconds=halftime_segment.end_ts - match_start_ts),  # type: ignore[arg-type]
+                    plt.axvspan(  # pyright: ignore[reportUnknownMemberType]
+                        datetime(1900, 1, 1)
+                        + timedelta(
+                            seconds=halftime_segment.start_ts - match_start_ts
+                        ),  # pyright: ignore[reportArgumentType]
+                        datetime(1900, 1, 1)
+                        + timedelta(
+                            seconds=halftime_segment.end_ts - match_start_ts
+                        ),  # pyright: ignore[reportArgumentType]
                         color=self._img_params["halftime_color"],
                         alpha=self._img_params["halftime_fill_transparency"],
                     )
                     mid_ht = datetime(1900, 1, 1) + timedelta(
                         seconds=(halftime_segment.start_ts + halftime_segment.end_ts) / 2 - match_start_ts
                     )
-                    plt.text(  # type: ignore[reportUnknownMemberType]
-                        mid_ht,  # type: ignore[arg-type]
+                    plt.text(  # pyright: ignore[reportUnknownMemberType]
+                        mid_ht,  # pyright: ignore[reportArgumentType]
                         self._img_params["halftime_label_axis_y_ancor"],
                         self._img_params["halftime_label"],
                         ha=self._img_params["halftime_label_axis_alignment"],
@@ -146,16 +164,23 @@ class QuoteSeriesPlot(Plot):
 
                     underdog_color = guest_color if u_seg.team == guest_team else host_color
 
-                    plt.axvspan(u_seg_start, u_seg_end, color=underdog_color, alpha=self._img_params["underdog_fill_transparency"], zorder=0)  # type: ignore[reportUnknownMemberType]
-                    plt.axvline(  # type: ignore[reportUnknownMemberType]
-                        u_seg_start,  # type: ignore[arg-type]
+                    plt.axvspan(  # pyright: ignore[reportUnknownMemberType]
+                        u_seg_start,  # pyright: ignore[reportArgumentType]
+                        u_seg_end,  # pyright: ignore[reportArgumentType]
+                        color=underdog_color,
+                        alpha=self._img_params["underdog_fill_transparency"],
+                        zorder=0,
+                    )
+                    plt.axvline(  # pyright: ignore[reportUnknownMemberType]
+                        u_seg_start,  # pyright: ignore[reportArgumentType]
                         color=underdog_color,
                         linestyle=self._img_params["underdog_fill_border_style"],
                         alpha=self._img_params["underdog_fill_border_transparency"],
                     )
 
-                    plt.scatter(  # type: ignore[reportUnknownMemberType]
-                        datetime(1900, 1, 1) + timedelta(seconds=u_seg.min_ts - match_start_ts),  # type: ignore[arg-type]
+                    plt.scatter(  # pyright: ignore[reportUnknownMemberType]
+                        datetime(1900, 1, 1)
+                        + timedelta(seconds=u_seg.min_ts - match_start_ts),  # pyright: ignore[reportArgumentType]
                         float(u_seg.min_price),
                         color=underdog_color,
                         edgecolor=self._img_params["underdog_dot_border_color"],
@@ -165,9 +190,13 @@ class QuoteSeriesPlot(Plot):
                         clip_on=False,
                     )
 
-                    plt.annotate(  # type: ignore[reportUnknownMemberType]
+                    plt.annotate(  # pyright: ignore[reportUnknownMemberType]
                         f"{float(u_seg.min_price):.3f}",
-                        xy=(datetime(1900, 1, 1) + timedelta(seconds=u_seg.min_ts - match_start_ts), float(u_seg.min_price)),  # type: ignore[arg-type]
+                        xy=(
+                            datetime(1900, 1, 1)
+                            + timedelta(seconds=u_seg.min_ts - match_start_ts),  # pyright: ignore[reportArgumentType]
+                            float(u_seg.min_price),
+                        ),
                         xytext=self._img_params["underdog_dot_label_offset"],
                         textcoords="offset points",
                         ha=self._img_params["underdog_dot_label_axis_alignment"],
@@ -176,8 +205,8 @@ class QuoteSeriesPlot(Plot):
                         color=self._img_params["underdog_label_color"],
                     )
 
-                    plt.text(  # type: ignore[reportUnknownMemberType]
-                        u_seg_mid,  # type: ignore[arg-type]
+                    plt.text(  # pyright: ignore[reportUnknownMemberType]
+                        u_seg_mid,  # pyright: ignore[reportArgumentType]
                         self._img_params["underdog_time_label_axis_y_ancor"],
                         f"{u_seg_duration_min} min" if u_seg_duration_min > 2 else "",
                         ha=self._img_params["underdog_time_label_axis_alignment"],
@@ -191,21 +220,25 @@ class QuoteSeriesPlot(Plot):
 
                 plt.gca().xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
 
-                plt.ylim(*self._img_params["image_axis_y_limit"])  # type: ignore[reportUnknownMemberType]
-                plt.xlim(datetime(1900, 1, 1), datetime(1900, 1, 1) + timedelta(seconds=match_end_ts - match_start_ts))  # type: ignore[reportUnknownMemberType]
+                plt.ylim(*self._img_params["image_axis_y_limit"])  # pyright: ignore[reportUnknownMemberType]
+                plt.xlim(  # pyright: ignore[reportUnknownMemberType]
+                    datetime(1900, 1, 1), datetime(1900, 1, 1) + timedelta(seconds=match_end_ts - match_start_ts)
+                )
 
-                plt.title(f"{game_date} • {guest_team} {guest_score}:{host_score} {host_team} • {market_type} {game_id}")  # type: ignore[reportUnknownMemberType]
-                plt.xlabel(self._img_params["image_axis_x_label"])  # type: ignore[reportUnknownMemberType]
-                plt.ylabel(self._img_params["image_axis_y_label"])  # type: ignore[reportUnknownMemberType]
-                plt.grid(True)  # type: ignore[reportUnknownMemberType]
-                plt.legend(  # type: ignore[reportUnknownMemberType]
+                plt.title(  # pyright: ignore[reportUnknownMemberType]
+                    f"{game_date} • {guest_team} {guest_score}:{host_score} {host_team} • {market_type} {game_id}"
+                )
+                plt.xlabel(self._img_params["image_axis_x_label"])  # pyright: ignore[reportUnknownMemberType]
+                plt.ylabel(self._img_params["image_axis_y_label"])  # pyright: ignore[reportUnknownMemberType]
+                plt.grid(True)  # pyright: ignore[reportUnknownMemberType]
+                plt.legend(  # pyright: ignore[reportUnknownMemberType]
                     facecolor=self._img_params["legend_background_color"],
                     edgecolor=self._img_params["legend_border_color"],
                     framealpha=self._img_params["legend_transparency"],
                     labelcolor=self._img_params["legend_labels_color"],
                 )
                 plt.tight_layout()
-                plt.savefig(path_without_bg, transparent=True)  # type: ignore[reportUnknownMemberType]
+                plt.savefig(path_without_bg, transparent=True)  # pyright: ignore[reportUnknownMemberType]
                 plt.close()
 
                 visuals_paths.append((path_without_bg, path_with_bg))

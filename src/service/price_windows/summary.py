@@ -18,7 +18,7 @@ class PriceWindowSummary(Summary):
         all_windows: list[WindowSegment] = []
 
         for game in games_dict.values():
-            windows = game._window_segs.get(side) if game._window_segs else None  # type: ignore
+            windows = game._window_segs.get(side) if game._window_segs else None  # pyright: ignore[reportPrivateUsage]
             if not windows:
                 continue
             games_with_windows.append(windows)

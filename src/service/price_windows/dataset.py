@@ -116,6 +116,8 @@ class PriceWindowDataSet(DataSet):
         start, end = self._query.window_start, self._query.window_end
         dataset = self._process_rows(rows=rows)
         for game in dataset.values():
-            game._window_segs = self._extract_price_window_segments(item=game, window_start=start, window_end=end)  # type: ignore
+            game._window_segs = self._extract_price_window_segments(
+                item=game, window_start=start, window_end=end
+            )  # pyright: ignore[reportPrivateUsage]
 
         return dataset

@@ -70,7 +70,7 @@ class PriceWindowChart(Chart):
         min_height = 0.5
         heights = [v if v > 0 else min_height for v in values]
 
-        bars = ax.bar(  # type: ignore[reportUnknownMemberType]
+        bars = ax.bar(  # pyright: ignore[reportUnknownMemberType]
             x=positions,
             height=heights,
             width=width,
@@ -79,15 +79,19 @@ class PriceWindowChart(Chart):
             alpha=self._img_params["bar_transparency"],
         )
 
-        for bar, val, (matched, total) in zip(bars, values, totals, strict=False):  # type: ignore[reportUnknownMemberType]
-            pos_hor = bar.get_x() + bar.get_width() / 2  # type: ignore[reportUnknownMemberType]
-            pos_ver = bar.get_height() + 1  # type: ignore[reportUnknownMemberType]
+        for bar, val, (matched, total) in zip(
+            bars, values, totals, strict=False
+        ):  # pyright: ignore[reportUnknownVariableType]
+            pos_hor = (
+                bar.get_x() + bar.get_width() / 2
+            )  # pyright: ignore[reportUnknownVariableType, reportUnknownMemberType]
+            pos_ver = bar.get_height() + 1  # pyright: ignore[reportUnknownVariableType, reportUnknownMemberType]
 
             if val == 0:
-                bar.set_alpha(0)  # type: ignore[reportUnknownMemberType]
-                ax.text(  # type: ignore[reportUnknownMemberType]
-                    x=pos_hor,  # type: ignore[reportUnknownMemberType]
-                    y=pos_ver,  # type: ignore[reportUnknownMemberType]
+                bar.set_alpha(0)  # pyright: ignore[reportUnknownMemberType]
+                ax.text(  # pyright: ignore[reportUnknownMemberType]
+                    x=pos_hor,  # pyright: ignore[reportUnknownArgumentType]
+                    y=pos_ver,  # pyright: ignore[reportUnknownArgumentType]
                     s="NO CASES",
                     ha=self._img_params["bar_label_axis_hor_alignment"],
                     va=self._img_params["bar_label_axis_ver_alignment"],
@@ -96,9 +100,9 @@ class PriceWindowChart(Chart):
                     color=color,
                 )
             else:
-                ax.text(  # type: ignore[reportUnknownMemberType]
-                    x=pos_hor,  # type: ignore[reportUnknownMemberType]
-                    y=pos_ver,  # type: ignore[reportUnknownMemberType]
+                ax.text(  # pyright: ignore[reportUnknownMemberType]
+                    x=pos_hor,  # pyright: ignore[reportUnknownArgumentType]
+                    y=pos_ver,  # pyright: ignore[reportUnknownArgumentType]
                     s=f"{val:.1f}%",
                     ha=self._img_params["bar_label_axis_hor_alignment"],
                     va=self._img_params["bar_label_axis_ver_alignment"],
@@ -107,8 +111,8 @@ class PriceWindowChart(Chart):
                     color=self._img_params["bar_label_color"],
                 )
 
-                ax.text(  # type: ignore[reportUnknownMemberType]
-                    x=pos_hor,  # type: ignore[reportUnknownMemberType]
+                ax.text(  # pyright: ignore[reportUnknownMemberType]
+                    x=pos_hor,  # pyright: ignore[reportUnknownArgumentType]
                     y=2,
                     s=f"{matched} / {total}",
                     ha=self._img_params["bar_label_axis_hor_alignment"],
@@ -178,8 +182,10 @@ class PriceWindowChart(Chart):
             values[5],  # VS TEAM
         ]
 
-        with plt.rc_context(self._plot_style):  # type: ignore[reportUnknownMemberType]
-            fig, ax = plt.subplots(figsize=self._img_params["image_size"], facecolor="none")  # type: ignore[reportUnknownMemberType]
+        with plt.rc_context(self._plot_style):  # pyright: ignore[reportUnknownMemberType]
+            fig, ax = plt.subplots(
+                figsize=self._img_params["image_size"], facecolor="none"
+            )  # pyright: ignore[reportUnknownMemberType]
 
             guest_vals = [values[0], values[2], values[4]] if team_vs != all_teams else [values[0], values[2]]
             host_vals = [values[1], values[3], values[5]] if team_vs != all_teams else [values[1], values[3]]
@@ -220,24 +226,26 @@ class PriceWindowChart(Chart):
                 label=NBATeamSide.HOST.upper(),
             )
 
-            ax.set_xticks(bar_spacing)  # type: ignore[reportUnknownMemberType]
-            ax.set_xticklabels(tick_labels)  # type: ignore[reportUnknownMemberType]
+            ax.set_xticks(bar_spacing)  # pyright: ignore[reportUnknownMemberType]
+            ax.set_xticklabels(tick_labels)  # pyright: ignore[reportUnknownMemberType]
 
             max_val = max(guest_vals + host_vals)
             upper_limit = max_val * 1.15 if max_val > 0 else 10
             ax.set_ylim(0, upper_limit)
 
-            ax.set_ylabel(self._img_params["axis_y_label"])  # type: ignore[reportUnknownMemberType]
-            plt.title(f"{date.today()} • {window_start}-{window_end} Window Stats • {team} vs {team_vs}")  # type: ignore[reportUnknownMemberType]
+            ax.set_ylabel(self._img_params["axis_y_label"])  # pyright: ignore[reportUnknownMemberType]
+            plt.title(
+                f"{date.today()} • {window_start}-{window_end} Window Stats • {team} vs {team_vs}"
+            )  # pyright: ignore[reportUnknownMemberType]
 
-            ax.grid(axis="x", visible=False)  # type: ignore[reportUnknownMemberType]
-            ax.grid(  # type: ignore[reportUnknownMemberType]
+            ax.grid(axis="x", visible=False)  # pyright: ignore[reportUnknownMemberType]
+            ax.grid(  # pyright: ignore[reportUnknownMemberType]
                 axis="y",
                 linestyle=self._img_params["axis_y_grid_style"],
                 alpha=self._img_params["axis_y_grid_transparency"],
             )
 
-            plt.legend(  # type: ignore[reportUnknownMemberType]
+            plt.legend(  # pyright: ignore[reportUnknownMemberType]
                 facecolor=self._img_params["legend_background_color"],
                 edgecolor=self._img_params["legend_border_color"],
                 framealpha=self._img_params["legend_transparency"],
@@ -245,7 +253,7 @@ class PriceWindowChart(Chart):
             )
 
             plt.tight_layout()
-            plt.savefig(path_without_bg, transparent=True)  # type: ignore[reportUnknownMemberType]
+            plt.savefig(path_without_bg, transparent=True)  # pyright: ignore[reportUnknownMemberType]
             plt.close(fig)
 
         return [(path_without_bg, path_with_bg)]

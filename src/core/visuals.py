@@ -26,7 +26,7 @@ class Visuals(ABC):
         os.makedirs(self._path_shared_dir / self._img_output_dir, exist_ok=True)
 
         try:
-            fm.fontManager.addfont(self._path_img_font)  # type: ignore[attr-defined]
+            fm.fontManager.addfont(self._path_img_font)  # pyright: ignore[reportUnknownMemberType]
         except Exception:
             logger.error("visuals %s: failed to set custom font", self.__class__.__name__)
 

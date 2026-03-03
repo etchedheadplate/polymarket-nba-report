@@ -162,7 +162,7 @@ class QuoteSeriesDataSet(DataSet):
 
         dataset = self._process_rows(rows)
         for game in dataset.values():
-            game._halftime_seg = self._extract_halftime_segment(game)  # type: ignore
-            game._underdog_segs = self._extract_underdog_segments(game)  # type: ignore
+            game._halftime_seg = self._extract_halftime_segment(game)  # pyright: ignore[reportPrivateUsage]
+            game._underdog_segs = self._extract_underdog_segments(game)  # pyright: ignore[reportPrivateUsage]
 
         return dataset
