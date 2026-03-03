@@ -4,6 +4,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    SERVICE_NAME: str
+    LOG_DIR: Path
+
     DB_NAME: str
     DB_HOST: str
     DB_PORT: int
