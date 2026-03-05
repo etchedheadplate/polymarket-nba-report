@@ -1,29 +1,21 @@
-from decimal import Decimal
-
 from pydantic import BaseModel, PositiveInt
 
-from src.service.domain import GameStatus, MarketType, NBATeam, NBATeamSide
+from src.service.domain import MarketType, NBATeam, NBATeamSide
 
 
-class Query(BaseModel):
-    game_status: GameStatus = GameStatus.FINISHED
+class BaseQuery(BaseModel):
     market_type: MarketType = MarketType.moneyline
     limit: PositiveInt | None = None
-    team: NBATeam
+
+
+class TeamQuery(BaseModel):
     team_vs: NBATeam | None = None
     team_side: NBATeamSide | None = None
 
 
-class PriceSnapshot(BaseModel):
-    timestamp: int
-    guest_price: Decimal | None
-    host_price: Decimal | None
+class TeamRequiredQuery(TeamQuery):
+    team: NBATeam
 
 
-class ReportItem(BaseModel):
-    guest_team: str
-    host_team: str
-    price_series: list[PriceSnapshot]
-
-
-class EventsHistory(Query): ...
+class TeamOptionalQuery(TeamQuery):
+    team: NBATeam | None
