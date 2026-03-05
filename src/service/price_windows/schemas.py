@@ -3,10 +3,10 @@ from decimal import Decimal
 from pydantic import BaseModel, PrivateAttr, computed_field
 
 from src.service.domain import NBATeamSide
-from src.service.schemas import ReportItem, ReportQuery
+from src.service.schemas import Query, ReportItem
 
 
-class PriceWindowQuery(ReportQuery):
+class PriceWindowQuery(Query):
     window_start: Decimal | None = None
     window_end: Decimal | None = None
 

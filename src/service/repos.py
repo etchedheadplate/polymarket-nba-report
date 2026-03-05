@@ -5,11 +5,11 @@ from sqlalchemy.orm import Session
 
 from src.database.models import NBAGamesModel, NBAMarketsModel, NBAPricesModel
 from src.service.domain import NBATeamSide
-from src.service.schemas import ReportQuery
+from src.service.schemas import Query
 
 
 class NBAGamesRepo:
-    def _build_team_conditions(self, query: ReportQuery):
+    def _build_team_conditions(self, query: Query):
         team = query.team.name
 
         if not query.team_vs:
@@ -33,7 +33,7 @@ class NBAGamesRepo:
                     and_(NBAGamesModel.guest_team == vs, NBAGamesModel.host_team == team),
                 )
 
-    def get_games(self, session: Session, query: ReportQuery, team_conditions: bool = True) -> list[Any]:
+    def get_games(self, session: Session, query: Query, team_conditions: bool = True) -> list[Any]:
         base_conditions = [
             NBAGamesModel.game_status == query.game_status,
         ]

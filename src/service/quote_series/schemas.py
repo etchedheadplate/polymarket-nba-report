@@ -3,10 +3,10 @@ from decimal import Decimal
 
 from pydantic import BaseModel, PositiveInt, PrivateAttr, computed_field, field_validator
 
-from src.service.schemas import ReportItem, ReportQuery
+from src.service.schemas import Query, ReportItem
 
 
-class QuoteSeriesQuery(ReportQuery): ...
+class QuoteSeriesQuery(Query): ...
 
 
 class HalftimeSegment(BaseModel):

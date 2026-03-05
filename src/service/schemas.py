@@ -5,7 +5,7 @@ from pydantic import BaseModel, PositiveInt
 from src.service.domain import GameStatus, MarketType, NBATeam, NBATeamSide
 
 
-class ReportQuery(BaseModel):
+class Query(BaseModel):
     game_status: GameStatus = GameStatus.FINISHED
     market_type: MarketType = MarketType.moneyline
     limit: PositiveInt | None = None
@@ -24,3 +24,6 @@ class ReportItem(BaseModel):
     guest_team: str
     host_team: str
     price_series: list[PriceSnapshot]
+
+
+class EventsHistory(Query): ...
