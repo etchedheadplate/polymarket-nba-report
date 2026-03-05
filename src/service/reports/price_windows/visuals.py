@@ -11,7 +11,7 @@ from numpy.typing import NDArray
 from src.config import settings
 from src.core.visuals import Chart
 from src.service.domain import NBATeamColor, NBATeamSide
-from src.service.price_windows.schemas import PriceWindowItem, PriceWindowQuery
+from src.service.reports.price_windows.schemas import PriceWindowItem, PriceWindowQuery
 
 
 class PriceWindowChart(Chart):
@@ -79,12 +79,12 @@ class PriceWindowChart(Chart):
             alpha=self._img_params["bar_transparency"],
         )
 
-        for bar, val, (matched, total) in zip(
+        for bar, val, (matched, total) in zip(  # pyright: ignore[reportUnknownVariableType]
             bars, values, totals, strict=False
-        ):  # pyright: ignore[reportUnknownVariableType]
-            pos_hor = (
-                bar.get_x() + bar.get_width() / 2
-            )  # pyright: ignore[reportUnknownVariableType, reportUnknownMemberType]
+        ):
+            pos_hor = (  # pyright: ignore[reportUnknownVariableType]
+                bar.get_x() + bar.get_width() / 2  # pyright: ignore[reportUnknownMemberType]
+            )
             pos_ver = bar.get_height() + 1  # pyright: ignore[reportUnknownVariableType, reportUnknownMemberType]
 
             if val == 0:
@@ -183,9 +183,9 @@ class PriceWindowChart(Chart):
         ]
 
         with plt.rc_context(self._plot_style):  # pyright: ignore[reportUnknownMemberType]
-            fig, ax = plt.subplots(
+            fig, ax = plt.subplots(  # pyright: ignore[reportUnknownMemberType]
                 figsize=self._img_params["image_size"], facecolor="none"
-            )  # pyright: ignore[reportUnknownMemberType]
+            )
 
             guest_vals = [values[0], values[2], values[4]] if team_vs != all_teams else [values[0], values[2]]
             host_vals = [values[1], values[3], values[5]] if team_vs != all_teams else [values[1], values[3]]
@@ -234,9 +234,9 @@ class PriceWindowChart(Chart):
             ax.set_ylim(0, upper_limit)
 
             ax.set_ylabel(self._img_params["axis_y_label"])  # pyright: ignore[reportUnknownMemberType]
-            plt.title(
+            plt.title(  # pyright: ignore[reportUnknownMemberType]
                 f"{date.today()} • {window_start}-{window_end} Window Stats • {team} vs {team_vs}"
-            )  # pyright: ignore[reportUnknownMemberType]
+            )
 
             ax.grid(axis="x", visible=False)  # pyright: ignore[reportUnknownMemberType]
             ax.grid(  # pyright: ignore[reportUnknownMemberType]

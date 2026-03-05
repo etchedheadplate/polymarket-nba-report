@@ -1,7 +1,7 @@
 import math
 from decimal import Decimal
 
-from src.service.schemas import ReportItem
+from src.service.reports.schemas import ReportItem
 
 
 def calculate_standard_deviation(values: list[Decimal]) -> float:

@@ -4,10 +4,10 @@ from typing import Any
 from src.core.dataset import DataSet
 from src.database.connection import sync_session_maker
 from src.service.domain import NBATeamSide
-from src.service.price_windows.schemas import PriceWindowItem, WindowSegment
+from src.service.reports.price_windows.schemas import PriceWindowItem, WindowSegment
+from src.service.reports.schemas import PriceSnapshot
+from src.service.reports.utils import normalize_prices
 from src.service.repos import NBAGamesRepo
-from src.service.schemas import PriceSnapshot
-from src.service.utils import normalize_prices
 
 
 class PriceWindowDataSet(DataSet):
@@ -111,13 +111,13 @@ class PriceWindowDataSet(DataSet):
 
     def create_dataset(self) -> dict[int, PriceWindowItem]:
         with sync_session_maker() as session:
-            rows = NBAGamesRepo().get_games(session=session, query=self._query, team_conditions=False)
+            rows = NBAGamesRepo().get_games_with_prices(session=session, query=self._query, team_conditions=False)
 
         start, end = self._query.window_start, self._query.window_end
         dataset = self._process_rows(rows=rows)
         for game in dataset.values():
-            game._window_segs = self._extract_price_window_segments(
+            game._window_segs = self._extract_price_window_segments(  # pyright: ignore[reportPrivateUsage]
                 item=game, window_start=start, window_end=end
-            )  # pyright: ignore[reportPrivateUsage]
+            )
 
         return dataset

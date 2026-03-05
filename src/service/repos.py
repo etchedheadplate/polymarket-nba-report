@@ -2,44 +2,65 @@ from typing import Any
 
 from sqlalchemy import and_, or_, select
 from sqlalchemy.orm import Session
+from sqlalchemy.sql.elements import ColumnElement
 
 from src.database.models import NBAGamesModel, NBAMarketsModel, NBAPricesModel
-from src.service.domain import NBATeamSide
-from src.service.schemas import Query
+from src.service.domain import NBATeam, NBATeamSide
+from src.service.events.schemas import EventsQuery
+from src.service.reports.schemas import ReportQuery
 
 
 class NBAGamesRepo:
-    def _build_team_conditions(self, query: Query):
-        team = query.team.name
-
-        if not query.team_vs:
-            if query.team_side == NBATeamSide.GUEST:
-                return NBAGamesModel.guest_team == team
-            elif query.team_side == NBATeamSide.HOST:
-                return NBAGamesModel.host_team == team
+    def _build_team_conditions(
+        self, team: NBATeam, team_vs: NBATeam | None, team_side: NBATeamSide | None
+    ) -> ColumnElement[bool]:
+        if not team_vs:
+            if team_side == NBATeamSide.GUEST:
+                return NBAGamesModel.guest_team == team.name
+            elif team_side == NBATeamSide.HOST:
+                return NBAGamesModel.host_team == team.name
             else:
-                return or_(NBAGamesModel.guest_team == team, NBAGamesModel.host_team == team)
+                return or_(NBAGamesModel.guest_team == team.name, NBAGamesModel.host_team == team)
 
         else:
-            vs = query.team_vs.name
+            vs = team_vs.name
 
-            if query.team_side == NBATeamSide.GUEST:
-                return and_(NBAGamesModel.guest_team == team, NBAGamesModel.host_team == vs)
-            elif query.team_side == NBATeamSide.HOST:
-                return and_(NBAGamesModel.guest_team == vs, NBAGamesModel.host_team == team)
+            if team_side == NBATeamSide.GUEST:
+                return and_(NBAGamesModel.guest_team == team.name, NBAGamesModel.host_team == vs)
+            elif team_side == NBATeamSide.HOST:
+                return and_(NBAGamesModel.guest_team == vs, NBAGamesModel.host_team == team.name)
             else:
                 return or_(
-                    and_(NBAGamesModel.guest_team == team, NBAGamesModel.host_team == vs),
-                    and_(NBAGamesModel.guest_team == vs, NBAGamesModel.host_team == team),
+                    and_(NBAGamesModel.guest_team == team.name, NBAGamesModel.host_team == vs),
+                    and_(NBAGamesModel.guest_team == vs, NBAGamesModel.host_team == team.name),
                 )
 
-    def get_games(self, session: Session, query: Query, team_conditions: bool = True) -> list[Any]:
-        base_conditions = [
-            NBAGamesModel.game_status == query.game_status,
-        ]
+    async def get_game_events(self, session: Session, query: EventsQuery) -> list[Any]:
+        base_conditions: list[ColumnElement[bool]] = [NBAGamesModel.game_date.between(query.start_date, query.end_date)]
+        if query.team:
+            team_conditions = self._build_team_conditions(query.team, query.team_vs, query.team_side)
+            base_conditions.append(team_conditions)
+
+        stmt = select(
+            NBAGamesModel.id,
+            NBAGamesModel.game_date,
+            NBAGamesModel.guest_team,
+            NBAGamesModel.host_team,
+            NBAGamesModel.guest_score,
+            NBAGamesModel.host_team,
+            NBAGamesModel.game_status,
+        ).where(
+            *base_conditions,
+        )
+        result = session.execute(stmt)
+        return list(result.all())
+
+    def get_games_with_prices(self, session: Session, query: ReportQuery, team_conditions: bool = True) -> list[Any]:
+        base_conditions = [NBAGamesModel.game_status == query.game_status]
 
         if team_conditions:
-            base_conditions.append(self._build_team_conditions(query))
+            additional_conditions = self._build_team_conditions(query.team, query.team_vs, query.team_side)
+            base_conditions.append(additional_conditions)
 
         if query.limit is None:
             stmt = (

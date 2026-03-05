@@ -1,6 +1,6 @@
 from typing import Any
 
-from src.service.reports import select_report
+from src.service.reports.selector import select_report
 
 
 def create_report(payload: dict[str, Any]) -> dict[str, Any]:

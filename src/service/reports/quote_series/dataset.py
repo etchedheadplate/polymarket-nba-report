@@ -3,10 +3,10 @@ from typing import Any
 
 from src.core.dataset import DataSet
 from src.database.connection import sync_session_maker
-from src.service.quote_series.schemas import HalftimeSegment, QuoteSeriesItem, UnderdogSegment
+from src.service.reports.quote_series.schemas import HalftimeSegment, QuoteSeriesItem, UnderdogSegment
+from src.service.reports.schemas import PriceSnapshot
+from src.service.reports.utils import calculate_standard_deviation, normalize_prices
 from src.service.repos import NBAGamesRepo
-from src.service.schemas import PriceSnapshot
-from src.service.utils import calculate_standard_deviation, normalize_prices
 
 
 class QuoteSeriesDataSet(DataSet):
@@ -158,7 +158,7 @@ class QuoteSeriesDataSet(DataSet):
 
     def create_dataset(self) -> dict[int, QuoteSeriesItem]:
         with sync_session_maker() as session:
-            rows = NBAGamesRepo().get_games(session=session, query=self._query)
+            rows = NBAGamesRepo().get_games_with_prices(session=session, query=self._query)
 
         dataset = self._process_rows(rows)
         for game in dataset.values():

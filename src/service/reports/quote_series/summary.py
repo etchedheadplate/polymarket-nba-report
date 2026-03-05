@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from src.core.summary import Summary
-from src.service.quote_series.schemas import QuoteSeriesItem, QuoteSeriesQuery
+from src.service.reports.quote_series.schemas import QuoteSeriesItem, QuoteSeriesQuery
 
 
 class QuoteSeriesSummary(Summary):

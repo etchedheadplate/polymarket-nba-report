@@ -1,19 +1,19 @@
 from typing import TypedDict
 
 from src.core.reports import Report
-from src.service.price_windows import (
+from src.service.reports.price_windows import (
     PriceWindowChart,
     PriceWindowDataSet,
     PriceWindowQuery,
     PriceWindowSummary,
 )
-from src.service.quote_series import (
+from src.service.reports.quote_series import (
     QuoteSeriesDataSet,
     QuoteSeriesPlot,
     QuoteSeriesQuery,
     QuoteSeriesSummary,
 )
-from src.service.schemas import ReportQuery
+from src.service.reports.schemas import ReportQuery
 
 
 class QuoteSeriesReport(Report):

@@ -3,8 +3,8 @@ from pathlib import Path
 
 from src.core.summary import Summary
 from src.service.domain import NBATeamSide
-from src.service.price_windows.schemas import PriceWindowItem, PriceWindowQuery, WindowSegment
-from src.service.utils import is_matching_game
+from src.service.reports.price_windows.schemas import PriceWindowItem, PriceWindowQuery, WindowSegment
+from src.service.reports.utils import is_matching_game
 
 
 class PriceWindowSummary(Summary):

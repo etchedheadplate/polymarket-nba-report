@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from src.config import settings
 from src.core.visuals import Plot
 from src.service.domain import NBATeamColor, NBATeamSide
-from src.service.quote_series.schemas import QuoteSeriesItem, QuoteSeriesQuery
+from src.service.reports.quote_series.schemas import QuoteSeriesItem, QuoteSeriesQuery
 
 
 class QuoteSeriesPlot(Plot):
