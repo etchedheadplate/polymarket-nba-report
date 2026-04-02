@@ -88,6 +88,7 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 cover/
+temp.py
 
 # OS‑generated files
 .DS_Store
@@ -114,7 +115,7 @@ venv.bak/
 secrets.json
 .secrets.baseline
 
-media/
+media/visuals/
 .local/
 logs/
 tmp/
