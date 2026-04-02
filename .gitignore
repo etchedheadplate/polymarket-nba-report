@@ -102,7 +102,6 @@ Desktop.ini
 
 # Environment / virtualenv
 .env
-.env.*
 .venv/
 env/
 venv/
