@@ -109,7 +109,17 @@ class GameStatus(StrEnum):
     UNKNOWN = "unknown"
 
 
-GAME_STATUS_NORMALIZATION_MAP = {
+GAME_STATUS_MAP: dict[GameStatus, str] = {
+    GameStatus.NOT_STARTED: "NS",
+    GameStatus.LIVE: "LV",
+    GameStatus.FINISHED: "FIN",
+    GameStatus.CANCELLED: "CAN",
+    GameStatus.SUSPENDED: "SUS",
+    GameStatus.UNKNOWN: "UNK",
+}
+
+
+GAME_STATUS_NORMALIZATION_MAP: dict[str, GameStatus] = {
     "NS": GameStatus.NOT_STARTED,
     "SCHED": GameStatus.NOT_STARTED,
     "Q1": GameStatus.LIVE,

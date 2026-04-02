@@ -6,8 +6,8 @@ from sqlalchemy.sql.elements import ColumnElement
 
 from src.database.models import NBAGamesModel, NBAMarketsModel, NBAPricesModel
 from src.service.domain import NBATeam, NBATeamSide
-from src.service.events.schemas import EventsQuery
 from src.service.reports.schemas import ReportQuery
+from src.service.schemas import EventsFutureQuery, EventsPastQuery
 
 
 class NBAGamesRepo:
@@ -20,7 +20,7 @@ class NBAGamesRepo:
             elif team_side == NBATeamSide.HOST:
                 return NBAGamesModel.host_team == team.name
             else:
-                return or_(NBAGamesModel.guest_team == team.name, NBAGamesModel.host_team == team)
+                return or_(NBAGamesModel.guest_team == team.name, NBAGamesModel.host_team == team.name)
 
         else:
             vs = team_vs.name
@@ -35,7 +35,7 @@ class NBAGamesRepo:
                     and_(NBAGamesModel.guest_team == vs, NBAGamesModel.host_team == team.name),
                 )
 
-    async def get_game_events(self, session: Session, query: EventsQuery) -> list[Any]:
+    def get_game_events(self, session: Session, query: EventsPastQuery | EventsFutureQuery) -> list[Any]:
         base_conditions: list[ColumnElement[bool]] = [NBAGamesModel.game_date.between(query.start_date, query.end_date)]
         if query.team:
             team_conditions = self._build_team_conditions(query.team, query.team_vs, query.team_side)
@@ -47,7 +47,7 @@ class NBAGamesRepo:
             NBAGamesModel.guest_team,
             NBAGamesModel.host_team,
             NBAGamesModel.guest_score,
-            NBAGamesModel.host_team,
+            NBAGamesModel.host_score,
             NBAGamesModel.game_status,
         ).where(
             *base_conditions,

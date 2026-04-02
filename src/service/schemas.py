@@ -1,4 +1,6 @@
-from pydantic import BaseModel, PositiveInt
+from datetime import date
+
+from pydantic import BaseModel, PositiveInt, field_validator
 
 from src.service.domain import MarketType, NBATeam, NBATeamSide
 
@@ -18,4 +20,22 @@ class TeamRequiredQuery(TeamQuery):
 
 
 class TeamOptionalQuery(TeamQuery):
-    team: NBATeam | None
+    team: NBATeam | None = None
+
+
+class EventsQuery(BaseModel):
+    start_date: date
+    end_date: date
+
+    @field_validator("start_date", "end_date", mode="before")
+    @classmethod
+    def parse_date(cls, value: str):
+        if isinstance(value, date):
+            return value
+        return date.fromisoformat(value)
+
+
+class EventsPastQuery(EventsQuery, TeamRequiredQuery): ...
+
+
+class EventsFutureQuery(EventsQuery, TeamOptionalQuery): ...
