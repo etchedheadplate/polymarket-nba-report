@@ -1,4 +1,4 @@
-This service creates visual reports on Polymarket NBA-related event statistics.
+This service creates visual reports on Polymarket NBA-related event statistics provided by [Polymarket NBA Oracle](https://github.com/etchedheadplate/polymarket-nba-oracle).
 
 ## Examples
 
