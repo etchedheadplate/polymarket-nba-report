@@ -1,3 +1,4 @@
+"""
 from src.service.reports.win_chances.dataset import WinChancesDataSet
 from src.service.reports.win_chances.schemas import WinChancesQuery
 from src.service.reports.win_chances.summary import WinChancesSummary
@@ -9,3 +10,4 @@ __all__ = [
     "WinChancesSummary",
     "WinChancesChart",
 ]
+"""
