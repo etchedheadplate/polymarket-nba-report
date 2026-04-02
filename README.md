@@ -1,6 +1,4 @@
-This service creates visual reports on Polymarket NBA-related event statistics. The system is built around a RabbitMQ-based task processing model. A consumer subscribes to task queues, executes incoming tasks, and publishes results back to response queues.
-
-The service can be adapted for processing game events from other sports leagues (e.g. WNBA, NHL, NFL).
+This service creates visual reports on Polymarket NBA-related event statistics.
 
 ## Examples
 
@@ -10,6 +8,8 @@ The service can be adapted for processing game events from other sports leagues 
 
 
 ## Usage
+
+The system is built around a RabbitMQ-based task processing model. A consumer subscribes to task queues, executes incoming tasks, and publishes results back to response queues.
 
 Start RabbitMQ consumer:
 
