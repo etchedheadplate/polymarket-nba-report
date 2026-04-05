@@ -14,9 +14,6 @@ class QuoteSeriesDataSet(DataSet):
         guest_series = [(p.timestamp, p.guest_price) for p in item.price_series if p.guest_price is not None]
         host_series = [(p.timestamp, p.host_price) for p in item.price_series if p.host_price is not None]
 
-        guest_series.sort()
-        host_series.sort()
-
         all_series = guest_series + host_series
         all_series.sort()
         if not all_series:
