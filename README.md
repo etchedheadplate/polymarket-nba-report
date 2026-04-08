@@ -1,4 +1,6 @@
-This service creates visual reports on Polymarket NBA-related event statistics provided by [Polymarket NBA Oracle](https://github.com/etchedheadplate/polymarket-nba-oracle).
+This repository is part of a system for technical analysis of a Polymarket NBA data. You can learn more [here](https://sonyn.dev/blog/2026-04-07-a-random-walk-down-diamond-district/).
+
+Report service creates visual reports on Polymarket NBA-related event statistics provided by [Polymarket NBA Oracle](https://github.com/etchedheadplate/polymarket-nba-oracle).
 
 ## Examples
 
