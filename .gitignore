@@ -110,6 +110,7 @@ env.bak/
 venv.bak/
 
 # Secrets & local configs
+/reports
 .secrets/
 secrets.json
 .secrets.baseline
