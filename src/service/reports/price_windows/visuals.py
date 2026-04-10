@@ -17,7 +17,6 @@ from src.service.reports.price_windows.schemas import PriceWindowItem, PriceWind
 class PriceWindowChart(Chart):
     _img_output_dir = "price_windows"
     _path_img_bg = settings.BACKGROUND_PRICE_WINDOW_PATH
-    _logo_dir = settings.TEAM_LOGO_DIR
     _img_params = {
         "image_size": (10, 5),
         "bar_width": 0.40,

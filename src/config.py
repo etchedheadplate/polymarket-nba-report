@@ -12,7 +12,6 @@ class Settings(BaseSettings):
     DB_USER: str = "postgres"
     DB_PASS: str = "postgres"
 
-    TEAM_LOGO_DIR: Path
     VISUALS_FONT_PATH: Path
     BACKGROUND_QUOTE_SERIES_PATH: Path
     BACKGROUND_PRICE_WINDOW_PATH: Path
