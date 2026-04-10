@@ -4,17 +4,17 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    SHARED_DIR: Path = Path("shared")
+    OUTPUT_DIR: Path = Path("reports")
+
+    FONT_PATH: Path | None = None
+    BG_QUOTE_SERIES_PATH: Path | None = None
+    BG_PRICE_WINDOW_PATH: Path | None = None
 
     DB_NAME: str = "polymarket_nba_orcale"
     DB_HOST: str = "localhost"
     DB_PORT: int = 5432
     DB_USER: str = "postgres"
     DB_PASS: str = "postgres"
-
-    VISUALS_FONT_PATH: Path
-    BACKGROUND_QUOTE_SERIES_PATH: Path
-    BACKGROUND_PRICE_WINDOW_PATH: Path
 
     RABBITMQ_HOST: str = "localhost"
     RABBITMQ_PORT: int = 5672
