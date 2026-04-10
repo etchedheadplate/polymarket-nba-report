@@ -11,17 +11,16 @@ from src.logger import logger
 
 
 class Visuals(ABC):
-    _visuals_title: str
-    _visuals_dir: str
     _img_params: dict[str, Any]
     _img_path_background: Path | None
     _img_ext_transparent: str = "png"
     _img_ext_composed: str = "jpg"
 
-    def __init__(self, query: Any, dataset: Any) -> None:
+    def __init__(self, visuals_title: str, query: Any, dataset: Any) -> None:
+        self._visuals_dir = settings.OUTPUT_DIR / visuals_title
         self._query = query
         self._dataset = dataset
-        os.makedirs(settings.OUTPUT_DIR / self._visuals_dir, exist_ok=True)
+        os.makedirs(self._visuals_dir, exist_ok=True)
 
         if settings.FONT_PATH:
             try:
@@ -89,10 +88,8 @@ class Plot(Visuals):
         "grid.alpha": 0.6,
     }
 
-    def __init__(self, query: Any, dataset: Any) -> None:
-        super().__init__(query=query, dataset=dataset)
-        self._plot_dir = settings.OUTPUT_DIR / self._visuals_dir
-        os.makedirs(self._plot_dir, exist_ok=True)
+    def __init__(self, visuals_title: str, query: Any, dataset: Any) -> None:
+        super().__init__(visuals_title=visuals_title, query=query, dataset=dataset)
 
 
 class Chart(Visuals):
@@ -117,7 +114,5 @@ class Chart(Visuals):
         "grid.alpha": 0.6,
     }
 
-    def __init__(self, query: Any, dataset: Any) -> None:
-        super().__init__(query=query, dataset=dataset)
-        self._chart_dir = settings.OUTPUT_DIR / self._visuals_dir
-        os.makedirs(self._chart_dir, exist_ok=True)
+    def __init__(self, visuals_title: str, query: Any, dataset: Any) -> None:
+        super().__init__(visuals_title=visuals_title, query=query, dataset=dataset)

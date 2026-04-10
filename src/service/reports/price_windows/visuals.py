@@ -15,8 +15,7 @@ from src.service.reports.price_windows.schemas import PriceWindowItem, PriceWind
 
 
 class PriceWindowChart(Chart):
-    _img_output_dir = "price_windows"
-    _path_img_bg = settings.BG_PRICE_WINDOW_PATH
+    _img_path_background = settings.BG_PRICE_WINDOW_PATH
     _img_params = {
         "image_size": (10, 5),
         "bar_width": 0.40,
@@ -39,8 +38,8 @@ class PriceWindowChart(Chart):
         "legend_labels_color": "#e9ecef",
     }
 
-    def __init__(self, query: PriceWindowQuery, dataset: dict[int, PriceWindowItem]) -> None:
-        super().__init__(query=query, dataset=dataset)
+    def __init__(self, visuals_title: str, query: PriceWindowQuery, dataset: dict[int, PriceWindowItem]) -> None:
+        super().__init__(visuals_title=visuals_title, query=query, dataset=dataset)
 
     def _compute_counts(self, games_dict: dict[int, PriceWindowItem]):
         counts = {NBATeamSide.GUEST: {"games": 0, "windows": 0}, NBATeamSide.HOST: {"games": 0, "windows": 0}}
@@ -131,15 +130,16 @@ class PriceWindowChart(Chart):
         window_start = self._query.window_start
         window_end = self._query.window_end
 
+        chart_title = f"{date.today()} • {window_start}-{window_end} Window Stats • {team} vs {team_vs}"
+
         color_scheme = getattr(NBATeamColor, team, None)
         guest_color = color_scheme[NBATeamSide.GUEST] if color_scheme else self._img_params["team_fallback_color_guest"]
         host_color = color_scheme[NBATeamSide.HOST] if color_scheme else self._img_params["team_fallback_color_host"]
 
-        report_dir = self._chart_dir
-        report_dir.mkdir(parents=True, exist_ok=True)
-
-        path_img_transparent = report_dir / f"tmp_{now}_{team}_{window_start}-{window_end}.{self._img_ext_transparent}"
-        path_img_composed = report_dir / f"{now}_{team}_{window_start}-{window_end}.{self._img_ext_composed}"
+        transparent_img_name = f"tmp_{now}_{team}_{window_start}-{window_end}.{self._img_ext_transparent}"
+        transparent_img_path = self._visuals_dir / transparent_img_name
+        composed_img_name = f"{now}_{team}_{window_start}-{window_end}.{self._img_ext_composed}"
+        composed_img_path = self._visuals_dir / composed_img_name
 
         all_games: dict[int, PriceWindowItem] = self._dataset
         team_games = {id: g for id, g in all_games.items() if g.guest_team == team or g.host_team == team}
@@ -231,11 +231,9 @@ class PriceWindowChart(Chart):
             max_val = max(guest_vals + host_vals)
             upper_limit = max_val * 1.15 if max_val > 0 else 10
             ax.set_ylim(0, upper_limit)
-
             ax.set_ylabel(self._img_params["axis_y_label"])  # pyright: ignore[reportUnknownMemberType]
-            plt.title(  # pyright: ignore[reportUnknownMemberType]
-                f"{date.today()} • {window_start}-{window_end} Window Stats • {team} vs {team_vs}"
-            )
+
+            plt.title(chart_title)  # pyright: ignore[reportUnknownMemberType]
 
             ax.grid(axis="x", visible=False)  # pyright: ignore[reportUnknownMemberType]
             ax.grid(  # pyright: ignore[reportUnknownMemberType]
@@ -252,7 +250,7 @@ class PriceWindowChart(Chart):
             )
 
             plt.tight_layout()
-            plt.savefig(path_img_transparent, transparent=True)  # pyright: ignore[reportUnknownMemberType]
+            plt.savefig(transparent_img_path, transparent=True)  # pyright: ignore[reportUnknownMemberType]
             plt.close(fig)
 
-        return [(path_img_transparent, path_img_composed)]
+        return [(transparent_img_path, composed_img_path)]

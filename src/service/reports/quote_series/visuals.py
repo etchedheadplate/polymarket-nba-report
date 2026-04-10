@@ -11,8 +11,7 @@ from src.service.reports.quote_series.schemas import QuoteSeriesItem, QuoteSerie
 
 
 class QuoteSeriesPlot(Plot):
-    _img_output_dir = "quote_series"
-    _path_img_bg = settings.BG_QUOTE_SERIES_PATH
+    _img_path_background = settings.BG_QUOTE_SERIES_PATH
     _img_params = {
         "image_size": (10, 5),
         "image_axis_y_limit": (0.0, 1.0),
@@ -48,8 +47,8 @@ class QuoteSeriesPlot(Plot):
         "underdog_time_label_transparency": 1.0,
     }
 
-    def __init__(self, query: QuoteSeriesQuery, dataset: dict[int, QuoteSeriesItem]) -> None:
-        super().__init__(query=query, dataset=dataset)
+    def __init__(self, visuals_title: str, query: QuoteSeriesQuery, dataset: dict[int, QuoteSeriesItem]) -> None:
+        super().__init__(visuals_title=visuals_title, query=query, dataset=dataset)
 
     def _make_transparent_data_image(self) -> list[tuple[Path | None, Path]]:
         visuals_paths: list[tuple[Path | None, Path]] = []
@@ -65,6 +64,12 @@ class QuoteSeriesPlot(Plot):
             host_team = game_data.host_team
             guest_score = game_data.guest_score
             host_score = game_data.host_score
+            game_date = game_data.game_date.isoformat()
+            market_type = game_data.market_type
+            halftime_segment = game_data.halftime_seg
+            underdog_segments = game_data.underdog_segs
+
+            plot_title = f"{game_date} • {guest_team} {guest_score}:{host_score} {host_team} • {market_type} {game_id}"
 
             guest_color_scheme = getattr(NBATeamColor, guest_team, None)
             guest_color = (
@@ -79,20 +84,13 @@ class QuoteSeriesPlot(Plot):
                 else self._img_params["team_fallback_color_host"]
             )
 
-            game_date = game_data.game_date.isoformat()
-            market_type = game_data.market_type
+            transparent_img_name = f"tmp_{game_id}.{self._img_ext_transparent}"
+            transparent_img_path = self._visuals_dir / transparent_img_name
+            composed_img_name = f"{game_date}_{guest_team}_{host_team}_{game_id}_{market_type}.{self._img_ext_composed}"
+            composed_img_path = self._visuals_dir / composed_img_name
 
-            halftime_segment = game_data.halftime_seg
-            underdog_segments = game_data.underdog_segs
-
-            path_img_transparent = self._plot_dir / f"tmp_{game_id}.{self._img_ext_transparent}"
-            path_img_composed = (
-                self._plot_dir
-                / f"{game_date}_{guest_team}_{host_team}_{game_id}_{market_type}.{self._img_ext_composed}"
-            )
-
-            if path_img_composed.exists():
-                visuals_paths.append((None, path_img_composed))
+            if composed_img_path.exists():
+                visuals_paths.append((None, composed_img_path))
                 continue
 
             if not underdog_segments:
@@ -226,9 +224,7 @@ class QuoteSeriesPlot(Plot):
                     datetime(1900, 1, 1), datetime(1900, 1, 1) + timedelta(seconds=match_end_ts - match_start_ts)
                 )
 
-                plt.title(  # pyright: ignore[reportUnknownMemberType]
-                    f"{game_date} • {guest_team} {guest_score}:{host_score} {host_team} • {market_type} {game_id}"
-                )
+                plt.title(plot_title)  # pyright: ignore[reportUnknownMemberType]
                 plt.xlabel(self._img_params["image_axis_x_label"])  # pyright: ignore[reportUnknownMemberType]
                 plt.ylabel(self._img_params["image_axis_y_label"])  # pyright: ignore[reportUnknownMemberType]
                 plt.grid(True)  # pyright: ignore[reportUnknownMemberType]
@@ -239,9 +235,9 @@ class QuoteSeriesPlot(Plot):
                     labelcolor=self._img_params["legend_labels_color"],
                 )
                 plt.tight_layout()
-                plt.savefig(path_img_transparent, transparent=True)  # pyright: ignore[reportUnknownMemberType]
+                plt.savefig(transparent_img_path, transparent=True)  # pyright: ignore[reportUnknownMemberType]
                 plt.close()
 
-                visuals_paths.append((path_img_transparent, path_img_composed))
+                visuals_paths.append((transparent_img_path, composed_img_path))
 
         return visuals_paths
