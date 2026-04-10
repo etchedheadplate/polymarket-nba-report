@@ -69,8 +69,8 @@ class PriceWindowSummary(Summary):
         window_end = self._query.window_end
 
         now = datetime.now().strftime("%Y%m%d_%H%M%S")
-        report_dir = self._path_shared_dir / self._file_output_dir
-        report_path = report_dir / f"{now}_{team}_{window_start}-{window_end}.{self._report_ext}"
+        report_dir = Path(self._summary_dir, self._file_output_dir)
+        report_path = report_dir / f"{now}_{team}_{window_start}-{window_end}.{self._summary_ext}"
 
         all_games: dict[int, PriceWindowItem] = self._dataset
         team_games = {id: game for id, game in all_games.items() if is_matching_game(game, team)}
