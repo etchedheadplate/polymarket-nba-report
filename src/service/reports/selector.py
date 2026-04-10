@@ -1,38 +1,27 @@
 from typing import TypedDict
 
 from src.core.reports import Report
-from src.service.reports.price_windows import (
-    PriceWindowChart,
-    PriceWindowDataSet,
-    PriceWindowQuery,
-    PriceWindowSummary,
-)
-from src.service.reports.quote_series import (
-    QuoteSeriesDataSet,
-    QuoteSeriesPlot,
-    QuoteSeriesQuery,
-    QuoteSeriesSummary,
-)
+from src.service.reports import price_windows, quote_series
 from src.service.reports.schemas import ReportQuery
 
 
 class QuoteSeriesReport(Report):
     report_title = "quote_series"
-    _dataset_cls = QuoteSeriesDataSet
-    _visuals_cls = QuoteSeriesPlot
-    _summary_cls = QuoteSeriesSummary
+    _dataset_cls = quote_series.QuoteSeriesDataSet
+    _visuals_cls = quote_series.QuoteSeriesPlot
+    _summary_cls = quote_series.QuoteSeriesSummary
 
-    def __init__(self, query: QuoteSeriesQuery) -> None:
+    def __init__(self, query: quote_series.QuoteSeriesQuery) -> None:
         super().__init__(title=self.report_title, query=query)
 
 
 class PriceWindowReport(Report):
     report_title: str = "price_windows"
-    _dataset_cls = PriceWindowDataSet
-    _visuals_cls = PriceWindowChart
-    _summary_cls = PriceWindowSummary
+    _dataset_cls = price_windows.PriceWindowDataSet
+    _visuals_cls = price_windows.PriceWindowChart
+    _summary_cls = price_windows.PriceWindowSummary
 
-    def __init__(self, query: PriceWindowQuery) -> None:
+    def __init__(self, query: price_windows.PriceWindowQuery) -> None:
         super().__init__(title=self.report_title, query=query)
 
 
@@ -42,8 +31,8 @@ class ReportMapping(TypedDict):
 
 
 _report_map: dict[str, ReportMapping] = {
-    "price_windows": {"report": PriceWindowReport, "query": PriceWindowQuery},
-    "quote_series": {"report": QuoteSeriesReport, "query": QuoteSeriesQuery},
+    "price_windows": {"report": PriceWindowReport, "query": price_windows.PriceWindowQuery},
+    "quote_series": {"report": QuoteSeriesReport, "query": quote_series.QuoteSeriesQuery},
 }
 
 
