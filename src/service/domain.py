@@ -107,3 +107,49 @@ class GameStatus(StrEnum):
     CANCELLED = "cancelled"
     SUSPENDED = "suspended"
     UNKNOWN = "unknown"
+
+
+GAME_STATUS_MAP: dict[GameStatus, str] = {
+    GameStatus.NOT_STARTED: "NS",
+    GameStatus.LIVE: "LV",
+    GameStatus.FINISHED: "FIN",
+    GameStatus.CANCELLED: "CAN",
+    GameStatus.SUSPENDED: "SUS",
+    GameStatus.UNKNOWN: "UNK",
+}
+
+
+GAME_STATUS_NORMALIZATION_MAP: dict[str, GameStatus] = {
+    "NS": GameStatus.NOT_STARTED,
+    "SCHED": GameStatus.NOT_STARTED,
+    "Q1": GameStatus.LIVE,
+    "Q2": GameStatus.LIVE,
+    "Q3": GameStatus.LIVE,
+    "Q4": GameStatus.LIVE,
+    "HT": GameStatus.LIVE,
+    "OT": GameStatus.LIVE,
+    "OT1": GameStatus.LIVE,
+    "OT2": GameStatus.LIVE,
+    "FT": GameStatus.FINISHED,
+    "FT OT": GameStatus.FINISHED,
+    "FT OT1": GameStatus.FINISHED,
+    "FT OT2": GameStatus.FINISHED,
+    "VFT": GameStatus.FINISHED,
+    "CAN": GameStatus.CANCELLED,
+    "POST": GameStatus.CANCELLED,
+    "SUSP": GameStatus.SUSPENDED,
+}
+
+
+class OrderStatus(StrEnum):
+    OPEN = "open"
+    PARTIAL = "partial"
+    FILLED = "filled"
+    EXPIRED = "expired"
+    CANCELLED = "cancelled"
+    UNKNOWN = "unknown"
+
+
+class OrderSide(StrEnum):
+    BUY = "BUY"
+    SELL = "SELL"
