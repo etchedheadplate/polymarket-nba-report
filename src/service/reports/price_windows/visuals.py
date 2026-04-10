@@ -16,7 +16,7 @@ from src.service.reports.price_windows.schemas import PriceWindowItem, PriceWind
 
 class PriceWindowChart(Chart):
     _img_output_dir = "price_windows"
-    _path_img_bg = settings.BACKGROUND_PRICE_WINDOW_PATH
+    _path_img_bg = settings.BG_PRICE_WINDOW_PATH
     _img_params = {
         "image_size": (10, 5),
         "bar_width": 0.40,
@@ -138,8 +138,8 @@ class PriceWindowChart(Chart):
         report_dir = self._chart_dir
         report_dir.mkdir(parents=True, exist_ok=True)
 
-        path_without_bg = report_dir / f"tmp_{now}_{team}_{window_start}-{window_end}.{self._img_ext_transp}"
-        path_with_bg = report_dir / f"{now}_{team}_{window_start}-{window_end}.{self._img_ext_final}"
+        path_img_transparent = report_dir / f"tmp_{now}_{team}_{window_start}-{window_end}.{self._img_ext_transparent}"
+        path_img_composed = report_dir / f"{now}_{team}_{window_start}-{window_end}.{self._img_ext_composed}"
 
         all_games: dict[int, PriceWindowItem] = self._dataset
         team_games = {id: g for id, g in all_games.items() if g.guest_team == team or g.host_team == team}
@@ -252,7 +252,7 @@ class PriceWindowChart(Chart):
             )
 
             plt.tight_layout()
-            plt.savefig(path_without_bg, transparent=True)  # pyright: ignore[reportUnknownMemberType]
+            plt.savefig(path_img_transparent, transparent=True)  # pyright: ignore[reportUnknownMemberType]
             plt.close(fig)
 
-        return [(path_without_bg, path_with_bg)]
+        return [(path_img_transparent, path_img_composed)]

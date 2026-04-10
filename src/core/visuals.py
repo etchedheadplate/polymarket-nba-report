@@ -12,23 +12,22 @@ from src.logger import logger
 
 class Visuals(ABC):
     _visuals_title: str
-    _img_output_dir: str
-    _img_ext_transp: str = "png"
-    _img_ext_final: str = "jpg"
-    _path_shared_dir: Path = settings.SHARED_DIR
-    _path_img_font: Path = settings.VISUALS_FONT_PATH
-    _path_img_bg: Path
+    _visuals_dir: str
     _img_params: dict[str, Any]
+    _img_path_background: Path | None
+    _img_ext_transparent: str = "png"
+    _img_ext_composed: str = "jpg"
 
     def __init__(self, query: Any, dataset: Any) -> None:
         self._query = query
         self._dataset = dataset
-        os.makedirs(self._path_shared_dir / self._img_output_dir, exist_ok=True)
+        os.makedirs(settings.OUTPUT_DIR / self._visuals_dir, exist_ok=True)
 
-        try:
-            fm.fontManager.addfont(self._path_img_font)  # pyright: ignore[reportUnknownMemberType]
-        except Exception:
-            logger.error("visuals %s: failed to set custom font", self.__class__.__name__)
+        if settings.FONT_PATH:
+            try:
+                fm.fontManager.addfont(settings.FONT_PATH)  # pyright: ignore[reportUnknownMemberType]
+            except Exception:
+                logger.error("visuals %s: failed to set custom font", self.__class__.__name__)
 
     @abstractmethod
     def _make_transparent_data_image(self) -> list[tuple[Path | None, Path]]: ...
@@ -37,23 +36,28 @@ class Visuals(ABC):
         image_paths: list[Path] = []
 
         for paths in visuals_paths:
-            path_without_bg, path_with_bg = paths
+            path_img_transparent, path_img_composed = paths
 
-            if path_without_bg:
-                background = Image.open(self._path_img_bg).convert("RGBA")
-                image_without_bg = Image.open(path_without_bg).convert("RGBA")
+            if path_img_transparent:
+                if self._img_path_background:
+                    background = Image.open(self._img_path_background).convert("RGBA")
+                else:
+                    background = Image.new("RGBA", (1600, 800), (0, 0, 0, 255))
 
                 bg_w, bg_h = background.size
-                image_without_bg = image_without_bg.resize((bg_w, bg_h))
 
-                image_with_bg = Image.alpha_composite(background, image_without_bg)
-                image_with_bg = image_with_bg.convert("RGB")
-                image_with_bg.save(path_with_bg)
-                path_without_bg.unlink(missing_ok=True)
+                file_img_transparent = Image.open(path_img_transparent).convert("RGBA")
+                file_img_transparent = file_img_transparent.resize((bg_w, bg_h))
 
-                logger.debug("visuals %s: created %s", self.__class__.__name__, path_with_bg)
+                file_img_composed = Image.alpha_composite(background, file_img_transparent)
+                file_img_composed = file_img_composed.convert("RGB")
 
-            image_paths.append(path_with_bg)
+                file_img_composed.save(path_img_composed)
+                path_img_transparent.unlink(missing_ok=True)
+
+                logger.debug("visuals %s: created %s", self.__class__.__name__, path_img_composed)
+
+            image_paths.append(path_img_composed)
 
         return image_paths
 
@@ -87,7 +91,7 @@ class Plot(Visuals):
 
     def __init__(self, query: Any, dataset: Any) -> None:
         super().__init__(query=query, dataset=dataset)
-        self._plot_dir = self._path_shared_dir / self._img_output_dir
+        self._plot_dir = settings.OUTPUT_DIR / self._visuals_dir
         os.makedirs(self._plot_dir, exist_ok=True)
 
 
@@ -115,5 +119,5 @@ class Chart(Visuals):
 
     def __init__(self, query: Any, dataset: Any) -> None:
         super().__init__(query=query, dataset=dataset)
-        self._chart_dir = self._path_shared_dir / self._img_output_dir
+        self._chart_dir = settings.OUTPUT_DIR / self._visuals_dir
         os.makedirs(self._chart_dir, exist_ok=True)

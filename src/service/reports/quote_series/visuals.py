@@ -12,7 +12,7 @@ from src.service.reports.quote_series.schemas import QuoteSeriesItem, QuoteSerie
 
 class QuoteSeriesPlot(Plot):
     _img_output_dir = "quote_series"
-    _path_img_bg = settings.BACKGROUND_QUOTE_SERIES_PATH
+    _path_img_bg = settings.BG_QUOTE_SERIES_PATH
     _img_params = {
         "image_size": (10, 5),
         "image_axis_y_limit": (0.0, 1.0),
@@ -85,13 +85,14 @@ class QuoteSeriesPlot(Plot):
             halftime_segment = game_data.halftime_seg
             underdog_segments = game_data.underdog_segs
 
-            path_without_bg = self._plot_dir / f"tmp_{game_id}.{self._img_ext_transp}"
-            path_with_bg = (
-                self._plot_dir / f"{game_date}_{guest_team}_{host_team}_{game_id}_{market_type}.{self._img_ext_final}"
+            path_img_transparent = self._plot_dir / f"tmp_{game_id}.{self._img_ext_transparent}"
+            path_img_composed = (
+                self._plot_dir
+                / f"{game_date}_{guest_team}_{host_team}_{game_id}_{market_type}.{self._img_ext_composed}"
             )
 
-            if path_with_bg.exists():
-                visuals_paths.append((None, path_with_bg))
+            if path_img_composed.exists():
+                visuals_paths.append((None, path_img_composed))
                 continue
 
             if not underdog_segments:
@@ -238,9 +239,9 @@ class QuoteSeriesPlot(Plot):
                     labelcolor=self._img_params["legend_labels_color"],
                 )
                 plt.tight_layout()
-                plt.savefig(path_without_bg, transparent=True)  # pyright: ignore[reportUnknownMemberType]
+                plt.savefig(path_img_transparent, transparent=True)  # pyright: ignore[reportUnknownMemberType]
                 plt.close()
 
-                visuals_paths.append((path_without_bg, path_with_bg))
+                visuals_paths.append((path_img_transparent, path_img_composed))
 
         return visuals_paths
