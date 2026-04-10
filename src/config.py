@@ -4,13 +4,13 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    SHARED_DIR: Path = Path("shared")
+
     DB_NAME: str = "polymarket_nba_orcale"
     DB_HOST: str = "localhost"
     DB_PORT: int = 5432
     DB_USER: str = "postgres"
     DB_PASS: str = "postgres"
-
-    SHARED_DIR: Path
 
     TEAM_LOGO_DIR: Path
     VISUALS_FONT_PATH: Path
