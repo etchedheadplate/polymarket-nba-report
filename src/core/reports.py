@@ -13,7 +13,8 @@ class Report(ABC):
     _visuals_cls: type[Visuals]
     _summary_cls: type[Summary]
 
-    def __init__(self, query: Any) -> None:
+    def __init__(self, title: str, query: Any) -> None:
+        self.title = title
         self.query = query
         self.visuals: list[Path] = []
         self.summary: Path = Path()
@@ -23,11 +24,11 @@ class Report(ABC):
         return dataset_processor.create_dataset()
 
     def _create_visuals(self, dataset: Any) -> None:
-        visuals_processor = self._visuals_cls(query=self.query, dataset=dataset)
+        visuals_processor = self._visuals_cls(visuals_title=self.title, query=self.query, dataset=dataset)
         self.visuals = visuals_processor.create_visuals()
 
     def _create_summary(self, dataset: Any) -> None:
-        summary_processor = self._summary_cls(query=self.query, dataset=dataset)
+        summary_processor = self._summary_cls(summary_title=self.title, query=self.query, dataset=dataset)
         self.summary = summary_processor.create_summary()
 
     def make_report(self) -> Any:

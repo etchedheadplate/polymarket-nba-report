@@ -17,21 +17,23 @@ from src.service.reports.schemas import ReportQuery
 
 
 class QuoteSeriesReport(Report):
+    report_title = "quote_series"
     _dataset_cls = QuoteSeriesDataSet
     _visuals_cls = QuoteSeriesPlot
     _summary_cls = QuoteSeriesSummary
 
     def __init__(self, query: QuoteSeriesQuery) -> None:
-        super().__init__(query)
+        super().__init__(title=self.report_title, query=query)
 
 
 class PriceWindowReport(Report):
+    report_title: str = "price_windows"
     _dataset_cls = PriceWindowDataSet
     _visuals_cls = PriceWindowChart
     _summary_cls = PriceWindowSummary
 
     def __init__(self, query: PriceWindowQuery) -> None:
-        super().__init__(query)
+        super().__init__(title=self.report_title, query=query)
 
 
 class ReportMapping(TypedDict):
