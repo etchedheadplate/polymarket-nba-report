@@ -7,14 +7,14 @@ from src.config import settings
 
 
 class Summary(ABC):
-    _summary_dir: str
     _summary_ext: str = "md"
 
-    def __init__(self, query: Any, dataset: Any) -> None:
+    def __init__(self, summary_title: str, query: Any, dataset: Any) -> None:
+        self._summary_dir = settings.OUTPUT_DIR / summary_title
         self._query = query
         self._dataset = dataset
         self._report_text = ""
-        os.makedirs(settings.OUTPUT_DIR / self._summary_dir, exist_ok=True)
+        os.makedirs(self._summary_dir, exist_ok=True)
 
     @abstractmethod
     def _make_data_summary(self) -> Path: ...

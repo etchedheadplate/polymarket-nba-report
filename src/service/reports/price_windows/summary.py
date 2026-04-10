@@ -8,10 +8,8 @@ from src.service.reports.utils import is_matching_game
 
 
 class PriceWindowSummary(Summary):
-    _file_output_dir = "price_windows"
-
-    def __init__(self, query: PriceWindowQuery, dataset: dict[int, PriceWindowItem]) -> None:
-        super().__init__(query=query, dataset=dataset)
+    def __init__(self, summary_title: str, query: PriceWindowQuery, dataset: dict[int, PriceWindowItem]) -> None:
+        super().__init__(summary_title=summary_title, query=query, dataset=dataset)
 
     def _collect_windows(self, games_dict: dict[int, PriceWindowItem], side: NBATeamSide):
         games_with_windows: list[list[WindowSegment]] = []
@@ -69,8 +67,8 @@ class PriceWindowSummary(Summary):
         window_end = self._query.window_end
 
         now = datetime.now().strftime("%Y%m%d_%H%M%S")
-        report_dir = Path(self._summary_dir, self._file_output_dir)
-        report_path = report_dir / f"{now}_{team}_{window_start}-{window_end}.{self._summary_ext}"
+        summary_name = f"{now}_{team}_{window_start}-{window_end}.{self._summary_ext}"
+        summary_path = self._summary_dir / summary_name
 
         all_games: dict[int, PriceWindowItem] = self._dataset
         team_games = {id: game for id, game in all_games.items() if is_matching_game(game, team)}
@@ -89,4 +87,4 @@ class PriceWindowSummary(Summary):
             report_blocks.append(self._compute_stats_text(team_vs_games, team, team_vs))
 
         self._report_text = "\n".join(report_blocks)
-        return report_path
+        return summary_path
