@@ -115,7 +115,8 @@ venv.bak/
 secrets.json
 .secrets.baseline
 
-media/visuals/
+assets/*
+!assets/README.md
 .local/
 logs/
 tmp/
