@@ -1,5 +1,5 @@
 from pathlib import Path
-
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -10,7 +10,14 @@ class Settings(BaseSettings):
     BG_QUOTE_SERIES_PATH: Path | None = None
     BG_PRICE_WINDOW_PATH: Path | None = None
 
-    DB_NAME: str = "polymarket_nba_orcale"
+    @field_validator("FONT_PATH", "BG_QUOTE_SERIES_PATH", "BG_PRICE_WINDOW_PATH", mode="before")
+    @classmethod
+    def empty_str_to_none(cls, v: str):
+        if v == "":
+            return None
+        return v
+
+    DB_NAME: str = "polymarket_nba_oracle"
     DB_HOST: str = "localhost"
     DB_PORT: int = 5432
     DB_USER: str = "postgres"
@@ -25,7 +32,7 @@ class Settings(BaseSettings):
     EXCHANGE_NAME: str = "polymarket.nba"
     QUEUE_TG_BOT: str = "tg_bot"
     QUEUE_ORACLE: str = "oracle"
-    QUEUE_REPORT: str = "reort"
+    QUEUE_REPORT: str = "report"
     RK_REQUEST: str = "request"
     RK_RESPONSE: str = "response"
 
