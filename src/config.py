@@ -17,7 +17,7 @@ class Settings(BaseSettings):
             return None
         return v
 
-    DB_NAME: str = "polymarket_nba_oracle"
+    DB_NAME: str = "polymarket_nba"
     DB_HOST: str = "localhost"
     DB_PORT: int = 5432
     DB_USER: str = "postgres"
