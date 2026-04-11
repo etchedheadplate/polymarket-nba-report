@@ -18,7 +18,7 @@ History of a team entering a specific price window in a game versus a specified 
 
 ## Usage
 
-### Enviroment
+### Environment
 
 Create a `.env` file in the root of the repository using the `.env.example` template.
 
