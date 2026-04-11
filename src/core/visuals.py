@@ -25,8 +25,8 @@ class Visuals(ABC):
         if settings.FONT_PATH:
             try:
                 fm.fontManager.addfont(settings.FONT_PATH)  # pyright: ignore[reportUnknownMemberType]
-            except Exception:
-                logger.error("visuals %s: failed to set custom font", self.__class__.__name__)
+            except Exception as e:
+                logger.error("visuals %s: failed to set custom font: %s", self.__class__.__name__, e)
 
     @abstractmethod
     def _make_transparent_data_image(self) -> list[tuple[Path | None, Path]]: ...
